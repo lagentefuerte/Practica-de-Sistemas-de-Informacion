@@ -59,3 +59,4 @@ for elem in datos_usuarios["usuarios"]:
 
 con.commit()
 cur.execute("SELECT count from usuarios")
+print("Numero de usuarios: " + cur.fetchall())
