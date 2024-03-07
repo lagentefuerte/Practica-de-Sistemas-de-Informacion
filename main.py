@@ -1,6 +1,12 @@
 import json
 import sqlite3
 import statistics
+import hashlib
+
+def calcularMD5 (cadena):
+    md5 = hashlib.md5()
+    md5.update(cadena.encode('utf-8'))
+    return md5.hexdigest()
 
 con = sqlite3.connect('example2.db')
 cur = con.cursor()
@@ -138,23 +144,24 @@ result = cur.fetchone()
 print("Valor mínimo de emails de phishing de un administrador:", result[0])
 print("Valor máximo de emails de phishing de un administrador:", result[1])
 
+cur.execute(""" ALTER TABLE usuarios DROP COLUMN es_contrasena_debil
+""")
+
 cur.execute( """ ALTER TABLE usuarios
-ADD COLUMN es_contrasena_debil BOOLEAN;
+ADD COLUMN es_contrasena_debil INTEGER;
 """)
 cur.execute(""" SELECT passwordHash from usuarios;
 """)
-lista_contrasenas = cur.fetchall()[0]
+lista_contrasenas = cur.fetchall()
 for contrasena in lista_contrasenas:
     bool = False
-    #while not bool:
-        #Comprobar si esta en rockyou
-    if bool:
-        cur.execute(""" UPDATE usuarios
-                        SET es_contrasena_debil = 1 WHERE passwordHash = contrasena;
-                        """)
-    else:
-        cur.execute(""" UPDATE usuarios
-                                SET es_contrasena_debil = 0 WHERE passwordHash = ?;
-                                """, (contrasena,))
-
+    f = open("rockyou-20.txt", 'r')
+    linea = f.readline()
+    while not bool and linea:
+        hashContrasena = calcularMD5(linea)
+        hashComparar = contrasena[0]
+        bool = hashContrasena == hashComparar
+        linea = f.readline()
+    cur.execute("UPDATE usuarios SET es_contrasena_debil = ? WHERE passwordHash = ?", (int(bool), contrasena[0]))
+con.commit()
 con.close()
