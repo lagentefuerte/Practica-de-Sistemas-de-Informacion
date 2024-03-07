@@ -1,7 +1,6 @@
 import json
 import sqlite3
 import statistics
-from datetime import datetime, date
 
 con = sqlite3.connect('example2.db')
 cur = con.cursor()
@@ -70,10 +69,10 @@ cur.execute("""
 """)
 resultados = cur.fetchall()
 
-# Almacenar el número de fechas de cambio de contraseña por usuario
+
 num_fechas_cambio_contraseña_por_usuario = [row[1] for row in resultados]
 
-# Calcular la media y desviación estándar en Python
+
 media_fechas_cambio_contraseña = statistics.mean(num_fechas_cambio_contraseña_por_usuario)
 desviacion_estandar_fechas_cambio_contraseña = statistics.stdev(num_fechas_cambio_contraseña_por_usuario)
 
@@ -105,13 +104,13 @@ cur.execute("""
 """)
 num_emails_phishing_por_usuario = [row[0] for row in cur.fetchall()]
 
-# Calcular la media y desviación estándar en Python
+
 media_emails_phishing = statistics.mean(num_emails_phishing_por_usuario)
 desviacion_estandar_emails_phishing = statistics.stdev(num_emails_phishing_por_usuario)
 print("Media de emails de phishing por usuario:", media_emails_phishing)
 print("Desviación estándar de emails de phishing por usuario:", desviacion_estandar_emails_phishing)
 
-# Valor mínimo y valor máximo del total de emails recibidos
+
 cur.execute("""
     SELECT MIN(num_emails) AS min_total_emails,
            MAX(num_emails) AS max_total_emails
@@ -139,5 +138,23 @@ result = cur.fetchone()
 print("Valor mínimo de emails de phishing de un administrador:", result[0])
 print("Valor máximo de emails de phishing de un administrador:", result[1])
 
-# Cerrar la conexión a la base de datos
+cur.execute( """ ALTER TABLE usuarios
+ADD COLUMN es_contrasena_debil BOOLEAN;
+""")
+cur.execute(""" SELECT passwordHash from usuarios;
+""")
+lista_contrasenas = cur.fetchall()[0]
+for contrasena in lista_contrasenas:
+    bool = False
+    #while not bool:
+        #Comprobar si esta en rockyou
+    if bool:
+        cur.execute(""" UPDATE usuarios
+                        SET es_contrasena_debil = 1 WHERE passwordHash = contrasena;
+                        """)
+    else:
+        cur.execute(""" UPDATE usuarios
+                                SET es_contrasena_debil = 0 WHERE passwordHash = ?;
+                                """, (contrasena,))
+
 con.close()
