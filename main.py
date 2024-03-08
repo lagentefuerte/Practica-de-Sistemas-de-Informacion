@@ -65,6 +65,7 @@ for elem in datos_usuarios["usuarios"]:
                         (clave, elem[clave]["ips"][i], elem[clave]["fechas"][i]))
 
 con.commit()
+f.close()
 cur.execute("SELECT COUNT(*) from usuarios")
 print("Numero de usuarios:", cur.fetchall()[0][0])
 # Obtener el número de fechas distintas por usuario en las que se ha cambiado la contraseña
@@ -164,4 +165,110 @@ for contrasena in lista_contrasenas:
         linea = f.readline()
     cur.execute("UPDATE usuarios SET es_contrasena_debil = ? WHERE passwordHash = ?", (int(bool), contrasena[0]))
 con.commit()
+f.close()
+cur.execute("""
+    SELECT Count(*)
+    FROM usuarios
+    WHERE permisos = 0 and phishing = 0
+""")
+phishing_usuario = cur.fetchall()
+cur.execute("""
+    SELECT Count(*)
+    FROM usuarios
+    WHERE permisos = 1 and phishing = 0
+""")
+phishing_admin = cur.fetchall()
+cur.execute("""
+    SELECT Count(*)
+    FROM usuarios
+    WHERE es_contrasena_debil = 1 and phishing = 0
+""")
+phishing_weakPWD = cur.fetchall()
+cur.execute("""
+    SELECT Count(*)
+    FROM usuarios
+    WHERE es_contrasena_debil = 0 and phishing = 0
+""")
+phishing_strongPWD = cur.fetchall()
+cur.execute("""
+    SELECT SUM(phishing), AVG(phishing), MAX(phishing), MIN(phishing)
+    FROM usuarios
+    WHERE permisos = 0
+""")
+result = cur.fetchone()
+emails_sum = result[0]
+emails_avg = result[1]
+emails_max = result[2]
+emails_min = result[3]
+cur.execute("""
+    SELECT SUM(phishing), AVG(phishing), MAX(phishing), MIN(phishing)
+    FROM usuarios
+    WHERE permisos = 1
+""")
+result = cur.fetchone()
+emails_sum = result[0]
+emails_avg = result[1]
+emails_max = result[2]
+emails_min = result[3]
+cur.execute("""
+    SELECT SUM(phishing), AVG(phishing), MAX(phishing), MIN(phishing)
+    FROM usuarios
+    WHERE es_contrasena_debil = 0
+""")
+result = cur.fetchone()
+emails_sum = result[0]
+emails_avg = result[1]
+emails_max = result[2]
+emails_min = result[3]
+#hacer lo que se quiera, imprimir,...
+cur.execute("""
+    SELECT SUM(phishing), AVG(phishing), MAX(phishing), MIN(phishing)
+    FROM usuarios
+    WHERE es_contrasena_debil = 1
+""")
+result = cur.fetchone()
+emails_sum = result[0]
+emails_avg = result[1]
+emails_max = result[2]
+emails_min = result[3]
+cur.execute("""
+    SELECT phishing
+    FROM usuarios
+    WHERE permisos = 0
+    GROUP BY username
+""")
+result = cur.fetchall()
+emails = [row[0] for row in result]
+emails_median = statistics.median(emails)
+emails_variance = statistics.variance(emails)
+cur.execute("""
+    SELECT phishing
+    FROM usuarios
+    WHERE permisos = 1
+    GROUP BY username
+""")
+result = cur.fetchall()
+emails = [row[0] for row in result]
+emails_median = statistics.median(emails)
+emails_variance = statistics.variance(emails)
+cur.execute("""
+    SELECT phishing
+    FROM usuarios
+    WHERE es_contrasena_debil = 0
+    GROUP BY username
+""")
+result = cur.fetchall()
+emails = [row[0] for row in result]
+emails_median = statistics.median(emails)
+emails_variance = statistics.variance(emails)
+cur.execute("""
+    SELECT phishing
+    FROM usuarios
+    WHERE es_contrasena_debil = 1
+    GROUP BY username
+""")
+result = cur.fetchall()
+emails = [row[0] for row in result]
+emails_median = statistics.median(emails)
+emails_variance = statistics.variance(emails)
 con.close()
