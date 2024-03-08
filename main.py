@@ -158,7 +158,7 @@ for contrasena in lista_contrasenas:
     f = open("rockyou-20.txt", 'r')
     linea = f.readline()
     while not bool and linea:
-        hashContrasena = calcularMD5(linea)
+        hashContrasena = calcularMD5(linea[:-1])
         hashComparar = contrasena[0]
         bool = hashContrasena == hashComparar
         linea = f.readline()
