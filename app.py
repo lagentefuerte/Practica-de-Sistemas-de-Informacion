@@ -1,4 +1,4 @@
-import db
+import sqlite3
 from flask import Flask, render_template
 import json
 import pandas as pd
@@ -11,8 +11,9 @@ app.static_folder = 'static'
 
 @app.route('/')
 def resultados():  # put application's code here
+    con = sqlite3.connect("example2.db")
     sql_query = "SELECT * FROM tabla_ejemplo;"
-    result = query_database(sql_query)
+    result = pd.read_sql_query(sql_query,con)
 
     # Procesar los resultados con pandas
     columns = ['columna1', 'columna2', 'columna3']  # Reemplaza con los nombres reales de tus columnas
@@ -26,6 +27,9 @@ def resultados():  # put application's code here
 
     return render_template("templates/resultados.html", data=data_dict)
 
+@app.route('/aux')
+def aux():
+    return render_template("resultados.html")
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True, port=5050)
