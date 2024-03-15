@@ -1,0 +1,75 @@
+
+def calcular_media_tiempo_cambio_contrasena_por_usuario(cur): #como coño se calcula el tiempo de cambio de contraseñas en cada usuario?
+    cur.execute("""
+        SELECT permisos, AVG(DISTINCT fecha) AS media_tiempo_cambio_contraseña
+        FROM ipfecha
+        JOIN usuarios ON ipfecha.username = usuarios.username
+        GROUP BY permisos
+    """)
+    resultados = cur.fetchall()
+    media_usuarios_normales = resultados[0][1]
+    media_administradores = resultados[1][1]
+    print("Media cambio contrasena usuarios normales:",end="")
+    print(media_usuarios_normales)
+    print("Media cambio contrasena administradores:",end="")
+    print(media_administradores)
+    return media_usuarios_normales, media_administradores
+def calcular_puntuaciones_usuarios_criticos(cur): #la puntuación hay que multiplicar por 100 el nº de fishing para que no de 0, algo; da directamente la probabilidad
+    cur.execute("""
+        SELECT username, (phishing*100 / total) AS puntuacion
+        FROM usuarios WHERE es_contrasena_debil==1
+        ORDER BY puntuacion DESC
+        LIMIT 10
+    """)
+    resultados = cur.fetchall()
+    usuarios = [row[0] for row in resultados]
+    puntuaciones = [row[1] for row in resultados]
+    print("usuarios",end="")
+    print(usuarios)
+    print("puntuaciones",end="")
+    print(puntuaciones)
+    return usuarios, puntuaciones
+
+
+users,punt=calcular_puntuaciones_usuarios_criticos(cur)
+
+def calcular_politicas_desactualizadas(cur): #que es desactualizada, menor a que año?
+    cur.execute("""
+        SELECT url, SUM(cookies + aviso + proteccionDatos) AS politicas_desactualizadas
+        FROM legalData WHERE creacion<2017
+        GROUP BY url
+        ORDER BY politicas_desactualizadas DESC
+        LIMIT 5
+    """)
+    resultados = cur.fetchall()
+    paginas_web = [row[0] for row in resultados]
+    politicas = [row[1] for row in resultados]
+    print("paginas web", end="")
+    print(paginas_web)
+    print("politicas", end="")
+    print(politicas) #en base al numero de politicas que tiene
+    return paginas_web, politicas
+pag,politicas=calcular_politicas_desactualizadas(cur)
+
+
+def calcular_cumplimiento_politicas_por_anio(cur):
+    cur.execute("""
+        SELECT creacion AS anio, 
+               SUM(CASE WHEN cookies = 1 AND aviso = 1 AND proteccionDatos = 1 THEN 1 ELSE 0 END) AS cumplen,
+               SUM(CASE WHEN cookies <> 1 OR aviso <> 1 OR proteccionDatos <> 1 THEN 1 ELSE 0 END) AS no_cumplen
+        FROM legalData
+        GROUP BY anio
+    """)
+    resultados = cur.fetchall()
+    anios = [row[0] for row in resultados]
+    cumplen = [row[1] for row in resultados]
+    no_cumplen = [row[2] for row in resultados]
+    print("años", end="")
+    print(anios)
+    print("cumplen politicas", end="")
+    print(cumplen)
+    print("no cumplen todas las politicas", end="")
+    print(no_cumplen)
+    return anios, cumplen, no_cumplen
+
+an,cum,no_cum=calcular_cumplimiento_politicas_por_anio(cur)
