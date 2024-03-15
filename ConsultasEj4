@@ -1,34 +1,59 @@
 
-def calcular_media_tiempo_cambio_contrasena_por_usuario(cur): #como coño se calcula el tiempo de cambio de contraseñas en cada usuario?
-    cur.execute("""
-        SELECT permisos, AVG(DISTINCT fecha) AS media_tiempo_cambio_contraseña
-        FROM ipfecha
-        JOIN usuarios ON ipfecha.username = usuarios.username
-        GROUP BY permisos
-    """)
-    resultados = cur.fetchall()
-    media_usuarios_normales = resultados[0][1]
-    media_administradores = resultados[1][1]
-    print("Media cambio contrasena usuarios normales:",end="")
-    print(media_usuarios_normales)
-    print("Media cambio contrasena administradores:",end="")
-    print(media_administradores)
-    return media_usuarios_normales, media_administradores
-def calcular_puntuaciones_usuarios_criticos(cur): #la puntuación hay que multiplicar por 100 el nº de fishing para que no de 0, algo; da directamente la probabilidad
-    cur.execute("""
-        SELECT username, (phishing*100 / total) AS puntuacion
-        FROM usuarios WHERE es_contrasena_debil==1
-        ORDER BY puntuacion DESC
-        LIMIT 10
-    """)
-    resultados = cur.fetchall()
-    usuarios = [row[0] for row in resultados]
-    puntuaciones = [row[1] for row in resultados]
-    print("usuarios",end="")
-    print(usuarios)
-    print("puntuaciones",end="")
-    print(puntuaciones)
-    return usuarios, puntuaciones
+def calcular_media_tiempo_cambio_contrasena_por_usuario(cur):
+   query = """
+    SELECT DISTINCT usuarios.username, fecha, permisos
+    FROM usuarios
+    JOIN ipfecha ON usuarios.username = ipfecha.username
+    ORDER BY usuarios.username, fecha
+"""
+
+cur.execute(query)
+rows = cur.fetchall()
+
+# Diccionario para almacenar las fechas ordenadas por usuario
+fechas_por_usuario = {}
+
+# Iterar sobre las filas y almacenar las fechas ordenadas por usuario
+for row in rows:
+    user, fecha_str, permiso = row
+    fecha = datetime.strptime(fecha_str, "%d/%m/%Y")
+
+    if user not in fechas_por_usuario:
+        fechas_por_usuario[user] = []
+
+    fechas_por_usuario[user].append((fecha, permiso))
+
+# Diccionario para almacenar los tiempos de cambio de contraseña por permiso
+tiempos_por_permiso = {}
+
+# Iterar sobre las fechas por usuario y calcular los tiempos de cambio de contraseña
+for user, fechas_permisos in fechas_por_usuario.items():
+    fechas_permisos.sort()  # Ordenar las fechas
+
+    for i in range(1, len(fechas_permisos)):
+        fecha_anterior, permiso_anterior = fechas_permisos[i - 1]
+        fecha_actual, permiso_actual = fechas_permisos[i]
+
+        # Verificar si es el mismo permiso
+        if permiso_actual == permiso_anterior:
+            # Calcular la diferencia de tiempo entre fechas consecutivas
+            tiempo_cambio = fecha_actual - fecha_anterior
+
+            # Agregar el tiempo de cambio a la lista correspondiente
+            if permiso_actual not in tiempos_por_permiso:
+                tiempos_por_permiso[permiso_actual] = []
+
+            tiempos_por_permiso[permiso_actual].append(tiempo_cambio.days)
+
+# Calcular la media de los tiempos de cambio de contraseña por permiso
+medias_por_permiso = {}
+for permiso, tiempos in tiempos_por_permiso.items():
+    media_tiempo = sum(tiempos) / len(tiempos)
+    medias_por_permiso[permiso] = media_tiempo
+
+# Imprimir la media de tiempo de cambio de contraseña por permiso
+for permiso, media in medias_por_permiso.items():
+    print(f"Media de tiempo de cambio de contraseña para permiso {permiso}: {media:.2f} días")
 
 
 users,punt=calcular_puntuaciones_usuarios_criticos(cur)

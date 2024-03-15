@@ -2,6 +2,8 @@ import json
 import sqlite3
 import statistics
 import hashlib
+from datetime import datetime
+
 
 def calcularMD5 (cadena):
     md5 = hashlib.md5()
@@ -271,4 +273,5 @@ result = cur.fetchall()
 emails = [row[0] for row in result]
 emails_median = statistics.median(emails)
 emails_variance = statistics.variance(emails)
+
 con.close()
