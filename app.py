@@ -2,34 +2,74 @@ import sqlite3
 from flask import Flask, render_template
 import json
 import pandas as pd
+from consultas import *
+import json
 
 
 
 app = Flask(__name__)
 app.static_folder = 'static'
 
+def conectar_base_datos():
+    return sqlite3.connect('example2.db')
 
 @app.route('/')
-def resultados():  # put application's code here
-    con = sqlite3.connect("example2.db")
-    sql_query = "SELECT * FROM tabla_ejemplo;"
-    result = pd.read_sql_query(sql_query,con)
+def indice():
+    return render_template("layout.html")
+@app.route('/Ej1.html')
+def resultadosEj1():
+    con=conectar_base_datos()
+    cur=con.cursor()
 
-    # Procesar los resultados con pandas
-    columns = ['columna1', 'columna2', 'columna3']  # Reemplaza con los nombres reales de tus columnas
-    df = pd.DataFrame(result, columns=columns)
+    num_usuarios = num_muestras(cur)
+    media_fechas, desviacion_fechas = media_desviacion_fechas_cambio_contrasena(cur)
+    media_ips, desviacion_ips = media_desv_ips_detectadas(cur)
+    media_emails_phishing, desviacion_emails_phishing = media_desv_phising(cur)
+    min_emails, max_emails = min_max_emails_recibidos(cur)
+    min_emails_phishing_admin, max_emails_phishing_admin = min_max_phising_interactuado_admin(cur)
 
-    # Aquí puedes realizar operaciones con pandas para preparar los datos para tus gráficas e informes
-    # Por ejemplo, podrías hacer df.plot() para obtener una gráfica rápida
 
-    # Convertir el DataFrame a un diccionario para pasarlo a la plantilla
-    data_dict = df.to_dict(orient='records')
 
-    return render_template("templates/resultados.html", data=data_dict)
+    con.close()
+    return render_template("Ej1.html",
+                           num_usuarios=num_usuarios,
+                           media_fechas=media_fechas,
+                           desviacion_fechas=desviacion_fechas,
+                           media_ips=media_ips,
+                           desviacion_ips=desviacion_ips,
+                           media_emails_phishing=media_emails_phishing,
+                           desviacion_emails_phishing=desviacion_emails_phishing,
+                           min_emails=min_emails,
+                           max_emails=max_emails,
+                           min_emails_phishing_admin=min_emails_phishing_admin,
+                           max_emails_phishing_admin=max_emails_phishing_admin
+                           )
+@app.route('/Ej3.html')
+def resultadosEj3():
+    con=conectar_base_datos()
+    cur=con.cursor()
 
-@app.route('/aux')
-def aux():
-    return render_template("resultados.html")
+    #la primera consulta
+    users, punt = calcular_puntuaciones_usuarios_criticos(cur)
+    pag, politicas = calcular_politicas_desactualizadas(cur)
+    anio, cumplen, no_cumplen = calcular_cumplimiento_politicas_por_anio(cur)
+
+    users_json = json.dumps(users)
+    punt_json = json.dumps(punt)
+    pag_json = json.dumps(pag)
+    politicas_json = json.dumps(politicas)
+    an_json = json.dumps(an)
+    cum_json = json.dumps(cum)
+    no_cum_json = json.dumps(no_cum)
+
+
+    con.close()
+    return render_template("Ej3.html",
+                           users=users_json, punt=punt_json,
+                           pag=pag_json, politicas=politicas_json,
+                           an=an_json, cum=cum_json, no_cum=no_cum_json)
+
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5050)

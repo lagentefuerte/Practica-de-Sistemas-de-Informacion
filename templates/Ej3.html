@@ -1,0 +1,100 @@
+{% extends "layout.html" %}
+
+{% block main %}
+    <h1>Ejercicio 3</h1>
+
+    <!-- Gráfica de puntuaciones de usuarios críticos -->
+    <canvas id="usuariosCriticosChart"></canvas>
+
+    <!-- Gráfica de políticas desactualizadas -->
+    <canvas id="politicasDesactualizadasChart"></canvas>
+
+    <!-- Gráfica de cumplimiento de políticas por año -->
+    <canvas id="cumplimientoPoliticasChart"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // JavaScript para crear las gráficas utilizando Chart.js
+        // Datos recibidos desde app.py
+        var users = {{ users|tojson|safe }};
+        var punt = {{ punt|tojson|safe }};
+        var pag = {{ pag|tojson|safe }};
+        var politicas = {{ politicas|tojson|safe }};
+        var an = {{ an|tojson|safe }};
+        var cum = {{ cum|tojson|safe }};
+        var no_cum = {{ no_cum|tojson|safe }};
+
+        // Gráfica de puntuaciones de usuarios críticos
+        var usuariosCriticosCtx = document.getElementById('usuariosCriticosChart').getContext('2d');
+        var usuariosCriticosChart = new Chart(usuariosCriticosCtx, {
+            type: 'bar',
+            data: {
+                labels: users,
+                datasets: [{
+                    label: 'Puntuaciones de usuarios críticos',
+                    data: punt,
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Gráfica de políticas desactualizadas
+        var politicasDesactualizadasCtx = document.getElementById('politicasDesactualizadasChart').getContext('2d');
+        var politicasDesactualizadasChart = new Chart(politicasDesactualizadasCtx, {
+            type: 'bar',
+            data: {
+                labels: pag,
+                datasets: [{
+                    label: 'Políticas desactualizadas',
+                    data: politicas,
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Gráfica de cumplimiento de políticas por año
+        var cumplimientoPoliticasCtx = document.getElementById('cumplimientoPoliticasChart').getContext('2d');
+        var cumplimientoPoliticasChart = new Chart(cumplimientoPoliticasCtx, {
+            type: 'line',
+            data: {
+                labels: an,
+                datasets: [{
+                    label: 'Cumplen políticas',
+                    data: cum,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'No cumplen políticas',
+                    data: no_cum,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+{% endblock %}

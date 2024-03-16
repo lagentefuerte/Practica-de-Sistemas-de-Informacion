@@ -56,6 +56,23 @@ for permiso, media in medias_por_permiso.items():
     print(f"Media de tiempo de cambio de contraseña para permiso {permiso}: {media:.2f} días")
 
 
+def calcular_puntuaciones_usuarios_criticos(cur): #la puntuación hay que multiplicar por 100 el nº de fishing para que no de 0, algo; da directamente la probabilidad
+    cur.execute("""
+        SELECT username, (phishing*100 / total) AS puntuacion
+        FROM usuarios WHERE es_contrasena_debil==1
+        ORDER BY puntuacion DESC
+        LIMIT 10
+    """)
+    resultados = cur.fetchall()
+    usuarios = [row[0] for row in resultados]
+    puntuaciones = [row[1] for row in resultados]
+    print("usuarios",end="")
+    print(usuarios)
+    print("puntuaciones",end="")
+    print(puntuaciones)
+    return usuarios, puntuaciones
+
+
 users,punt=calcular_puntuaciones_usuarios_criticos(cur)
 
 def calcular_politicas_desactualizadas(cur): #que es desactualizada, menor a que año?

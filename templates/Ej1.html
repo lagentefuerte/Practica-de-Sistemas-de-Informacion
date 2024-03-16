@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block main %}
+<div class="container">
+    <h1>Ejercicio 1</h1>
+    <div>
+        <h2>Número de Usuarios</h2>
+        <p>{{ num_usuarios }}</p>
+    </div>
+    <div>
+        <h2>Media y Desviación Estándar de Fechas de Cambio de Contraseña</h2>
+        <p>Media: {{ media_fechas }}</p>
+        <p>Desviación estándar: {{ desviacion_fechas }}</p>
+    </div>
+    <div>
+        <h2>Media y Desviación Estándar del Total de IPs Detectadas</h2>
+        <p>Media: {{ media_ips }}</p>
+        <p>Desviación estándar: {{ desviacion_ips }}</p>
+    </div>
+    <div>
+        <h2>Media y Desviación Estándar del Número de Emails de Phishing Recibidos</h2>
+        <p>Media: {{ media_emails_phishing }}</p>
+        <p>Desviación estándar: {{ desviacion_emails_phishing }}</p>
+    </div>
+    <div>
+        <h2>Valor Mínimo y Máximo del Total de Emails Recibidos</h2>
+        <p>Valor mínimo: {{ min_emails }}</p>
+        <p>Valor máximo: {{ max_emails }}</p>
+    </div>
+    <div>
+        <h2>Valor Mínimo y Máximo del Número de Emails de Phishing Recibidos por Administrador</h2>
+        <p>Valor mínimo: {{ min_emails_phishing_admin }}</p>
+        <p>Valor máximo: {{ max_emails_phishing_admin }}</p>
+    </div>
+</div>
+{% endblock %}
