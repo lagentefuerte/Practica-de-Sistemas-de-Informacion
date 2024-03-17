@@ -15,8 +15,8 @@ def conectar_base_datos():
 
 @app.route('/')
 def indice():
-    return render_template("layout.html")
-@app.route('/Ej1.html')
+    return render_template("resultados.html")
+@app.route('/Ej1')
 def resultadosEj1():
     con=conectar_base_datos()
     cur=con.cursor()
@@ -44,7 +44,7 @@ def resultadosEj1():
                            min_emails_phishing_admin=min_emails_phishing_admin,
                            max_emails_phishing_admin=max_emails_phishing_admin
                            )
-@app.route('/Ej3.html')
+@app.route('/Ej3')
 def resultadosEj3():
     con=conectar_base_datos()
     cur=con.cursor()
@@ -72,4 +72,4 @@ def resultadosEj3():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5050)
+    app.run(debug=True, port=8080)

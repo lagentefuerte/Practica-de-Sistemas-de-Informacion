@@ -1,32 +1,41 @@
 {% extends "layout.html" %}
 
 {% block main %}
-    <h1>Ejercicio 3</h1>
+<section class="container mt-2">
+    <div class="mx-auto mb-3" style="text-align: center; font-weight: bold; font-size: 24px;">Ejercicio 3</div>
 
-    <!-- Gráfica de puntuaciones de usuarios críticos -->
-    <canvas id="usuariosCriticosChart"></canvas>
+    <div class="mx-auto">
+        <!-- Gráfica de puntuaciones de usuarios críticos -->
+        <canvas id="usuariosCriticosChart"></canvas>
+    </div>
+    <div class="mx-auto">
+         <!-- Gráfica de políticas desactualizadas -->
+        <canvas id="politicasDesactualizadasChart"></canvas>
+    </div>
+    <div class="mx-auto">
+         <!-- Gráfica de cumplimiento de políticas por año -->
+        <canvas id="cumplimientoPoliticasChart"></canvas>
+    </div>
 
-    <!-- Gráfica de políticas desactualizadas -->
-    <canvas id="politicasDesactualizadasChart"></canvas>
 
-    <!-- Gráfica de cumplimiento de políticas por año -->
-    <canvas id="cumplimientoPoliticasChart"></canvas>
+</section>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // JavaScript para crear las gráficas utilizando Chart.js
         // Datos recibidos desde app.py
-        var users = {{ users|tojson|safe }};
-        var punt = {{ punt|tojson|safe }};
-        var pag = {{ pag|tojson|safe }};
-        var politicas = {{ politicas|tojson|safe }};
-        var an = {{ an|tojson|safe }};
-        var cum = {{ cum|tojson|safe }};
-        var no_cum = {{ no_cum|tojson|safe }};
+        var users = {{ users|safe }};
+        var punt = {{ punt|safe }};
+        var pag = {{ pag|safe }};
+        var politicas = {{ politicas|safe }};
+        var an = {{ an|safe }};
+        var cum = {{ cum|safe }};
+        var no_cum = {{ no_cum|safe }};
 
         // Gráfica de puntuaciones de usuarios críticos
         var usuariosCriticosCtx = document.getElementById('usuariosCriticosChart').getContext('2d');
-        var usuariosCriticosChart = new Chart(usuariosCriticosCtx, {
+        new Chart(usuariosCriticosCtx, {
             type: 'bar',
             data: {
                 labels: users,

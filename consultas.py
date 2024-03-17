@@ -302,10 +302,11 @@ def calcular_media_tiempo_cambio_contrasena_por_usuario(cur):
     ORDER BY usuarios.username, fecha
 """
 
-cur.execute="""SELECT DISTINCT usuarios.username, fecha, permisos
-    FROM usuarios
-    JOIN ipfecha ON usuarios.username = ipfecha.username
-    ORDER BY usuarios.username, fecha"""
+cur.execute('''SELECT DISTINCT usuarios.username, fecha, permisos 
+            FROM usuarios 
+            JOIN ipfecha 
+            ON usuarios.username = ipfecha.username 
+            ORDER BY usuarios.username, fecha''')
 rows = cur.fetchall()
 
 # Diccionario para almacenar las fechas ordenadas por usuario
