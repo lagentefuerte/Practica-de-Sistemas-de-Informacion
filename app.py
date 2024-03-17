@@ -44,6 +44,80 @@ def resultadosEj1():
                            min_emails_phishing_admin=min_emails_phishing_admin,
                            max_emails_phishing_admin=max_emails_phishing_admin
                            )
+
+@app.route('/Ej2')
+def resultadosEj2():
+    con = conectar_base_datos()
+    cur = con.cursor()
+    
+    observaciones_usuarios=num_observaciones_usuarios(cur)
+    sumUs,mediaUs,maxUs,minUS=sum_media_max_min_phishing_usuario(cur)
+    medianaUs,varianzaUs=mediana_varianza_phishing_usuarios(cur)
+
+
+    observaciones_admin=num_observaciones_admin(cur)
+    sumAd, mediaAd, maxAd, minAd = sum_media_max_min_phishing_admin(cur)
+    medianaAd,varianzaAd=mediana_varianza_phishing_admin(cur)
+
+    observaciones_pass_debil=num_observaciones_pass_debil(cur)
+    sumDebil, mediaDebil, maxDebil, minDebil = sum_media_max_min_phising_pass_debil(cur)
+    medianaDebil,varianzaDebil=mediana_varianza_phising_pass_debil(cur)
+
+    observaciones_pass_fuerte = num_observaciones_pass_fuerte(cur)
+    sumFuerte, mediaFuerte, maxFuerte, minFuerte = sum_media_max_min_phising_pass_fuerte(cur)
+    medianaFuerte,varianzaFuerte=mediana_varianza_phishing_pass_fuerte(cur)
+
+
+    con.close()
+
+    data = {
+        "usuarios": {
+            "observaciones": json.dumps(observaciones_usuarios),
+            "suma": json.dumps(sumUs),
+            "media": json.dumps(mediaUs),
+            "maximo": json.dumps(maxUs),
+            "minimo": json.dumps(minUS),
+            "mediana": json.dumps(medianaUs),
+            "varianza": json.dumps(varianzaUs)
+        },
+        "admin": {
+            "observaciones": json.dumps(observaciones_admin),
+            "suma": json.dumps(sumAd),
+            "media": json.dumps(mediaAd),
+            "maximo": json.dumps(maxAd),
+            "minimo": json.dumps(minAd),
+            "mediana": json.dumps(medianaAd),
+            "varianza": json.dumps(varianzaAd)
+        },
+        "debil": {
+            "observaciones": json.dumps(observaciones_pass_debil),
+            "suma": json.dumps(sumDebil),
+            "media": json.dumps(mediaDebil),
+            "maximo": json.dumps(maxDebil),
+            "minimo": json.dumps(minDebil),
+            "mediana": json.dumps(medianaDebil),
+            "varianza": json.dumps(varianzaDebil)
+        },
+        "fuerte": {
+            "observaciones": json.dumps(observaciones_pass_fuerte),
+            "suma": json.dumps(sumFuerte),
+            "media": json.dumps(mediaFuerte),
+            "maximo": json.dumps(maxFuerte),
+            "minimo": json.dumps(minFuerte),
+            "mediana": json.dumps(medianaFuerte),
+            "varianza": json.dumps(varianzaFuerte)
+        }
+    }
+
+    return render_template("Ej2.html", data=data)
+
+
+
+
+
+
+
+
 @app.route('/Ej3')
 def resultadosEj3():
     con=conectar_base_datos()
@@ -64,7 +138,6 @@ def resultadosEj3():
     an_json = json.dumps(anio)
     cum_json = json.dumps(cumplen)
     no_cum_json = json.dumps(no_cumplen)
-
 
 
     con.close()

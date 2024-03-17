@@ -176,6 +176,8 @@ def min_max_phising_interactuado_admin(cur):
 cur.execute(""" ALTER TABLE usuarios DROP COLUMN es_contrasena_debil
 """)
 
+# Agrupaciones
+
 cur.execute( """ ALTER TABLE usuarios
 ADD COLUMN es_contrasena_debil INTEGER;
 """)
@@ -195,111 +197,156 @@ for contrasena in lista_contrasenas:
 con.commit()
 f.close()
 
-cur.execute("""
-    SELECT Count(*)
-    FROM usuarios
-    WHERE permisos = 0 and phishing = 0
-""")
-phishing_usuario = cur.fetchall()
-cur.execute("""
-    SELECT Count(*)
-    FROM usuarios
-    WHERE permisos = 1 and phishing = 0
-""")
-phishing_admin = cur.fetchall()
-cur.execute("""
-    SELECT Count(*)
-    FROM usuarios
-    WHERE es_contrasena_debil = 1 and phishing = 0
-""")
-phishing_weakPWD = cur.fetchall()
-cur.execute("""
-    SELECT Count(*)
-    FROM usuarios
-    WHERE es_contrasena_debil = 0 and phishing = 0
-""")
-phishing_strongPWD = cur.fetchall()
-cur.execute("""
-    SELECT SUM(phishing), AVG(phishing), MAX(phishing), MIN(phishing)
-    FROM usuarios
-    WHERE permisos = 0
-""")
-result = cur.fetchone()
-emails_sum = result[0]
-emails_avg = result[1]
-emails_max = result[2]
-emails_min = result[3]
-cur.execute("""
-    SELECT SUM(phishing), AVG(phishing), MAX(phishing), MIN(phishing)
-    FROM usuarios
-    WHERE permisos = 1
-""")
-result = cur.fetchone()
-emails_sum = result[0]
-emails_avg = result[1]
-emails_max = result[2]
-emails_min = result[3]
-cur.execute("""
-    SELECT SUM(phishing), AVG(phishing), MAX(phishing), MIN(phishing)
-    FROM usuarios
-    WHERE es_contrasena_debil = 0
-""")
-result = cur.fetchone()
-emails_sum = result[0]
-emails_avg = result[1]
-emails_max = result[2]
-emails_min = result[3]
-#hacer lo que se quiera, imprimir,...
-cur.execute("""
-    SELECT SUM(phishing), AVG(phishing), MAX(phishing), MIN(phishing)
-    FROM usuarios
-    WHERE es_contrasena_debil = 1
-""")
-result = cur.fetchone()
-emails_sum = result[0]
-emails_avg = result[1]
-emails_max = result[2]
-emails_min = result[3]
-cur.execute("""
-    SELECT phishing
-    FROM usuarios
-    WHERE permisos = 0
-    GROUP BY username
-""")
-result = cur.fetchall()
-emails = [row[0] for row in result]
-emails_median = statistics.median(emails)
-emails_variance = statistics.variance(emails)
-cur.execute("""
-    SELECT phishing
-    FROM usuarios
-    WHERE permisos = 1
-    GROUP BY username
-""")
-result = cur.fetchall()
-emails = [row[0] for row in result]
-emails_median = statistics.median(emails)
-emails_variance = statistics.variance(emails)
-cur.execute("""
-    SELECT phishing
-    FROM usuarios
-    WHERE es_contrasena_debil = 0
-    GROUP BY username
-""")
-result = cur.fetchall()
-emails = [row[0] for row in result]
-emails_median = statistics.median(emails)
-emails_variance = statistics.variance(emails)
-cur.execute("""
-    SELECT phishing
-    FROM usuarios
-    WHERE es_contrasena_debil = 1
-    GROUP BY username
-""")
-result = cur.fetchall()
-emails = [row[0] for row in result]
-emails_median = statistics.median(emails)
-emails_variance = statistics.variance(emails)
+
+#CONSULTAS
+def num_observaciones_usuarios(cur):
+    cur.execute("""
+        SELECT Count(*)
+        FROM usuarios
+        WHERE permisos = 0 and phishing = 0
+    """)
+    phishing_usuario = cur.fetchone()[0]
+    #print(phishing_usuario)
+    return phishing_usuario
+#num_observaciones_usuarios(cur)
+
+
+
+def num_observaciones_admin(cur):
+    cur.execute("""
+        SELECT Count(*)
+        FROM usuarios
+        WHERE permisos = 1 and phishing = 0
+    """)
+    phishing_admin = cur.fetchone()[0]
+    return phishing_admin
+
+def num_observaciones_pass_debil(cur):
+    cur.execute("""
+        SELECT Count(*)
+        FROM usuarios
+        WHERE es_contrasena_debil = 1 and phishing = 0
+    """)
+    phishing_weakPWD = cur.fetchone()[0]
+    return phishing_weakPWD
+
+def num_observaciones_pass_fuerte(cur):
+    cur.execute("""
+        SELECT Count(*)
+        FROM usuarios
+        WHERE es_contrasena_debil = 0 and phishing = 0
+    """)
+    phishing_strongPWD = cur.fetchone()[0]
+    return phishing_strongPWD
+
+def sum_media_max_min_phishing_usuario(cur):
+    cur.execute("""
+        SELECT SUM(phishing), AVG(phishing), MAX(phishing), MIN(phishing)
+        FROM usuarios
+        WHERE permisos = 0
+    """)
+    result = cur.fetchone()
+    emails_sum = result[0]
+    emails_avg = result[1]
+    emails_max = result[2]
+    emails_min = result[3]
+    #print(emails_sum,emails_avg,emails_max,emails_min)
+    return emails_sum,emails_avg,emails_max,emails_min
+#sum_media_max_min_phishing_usuario(cur)
+
+def sum_media_max_min_phishing_admin(cur):
+    cur.execute("""
+        SELECT SUM(phishing), AVG(phishing), MAX(phishing), MIN(phishing)
+        FROM usuarios
+        WHERE permisos = 1
+    """)
+    result = cur.fetchone()
+    emails_sum = result[0]
+    emails_avg = result[1]
+    emails_max = result[2]
+    emails_min = result[3]
+    return emails_sum,emails_avg,emails_max,emails_min
+
+def sum_media_max_min_phising_pass_fuerte(cur):
+    cur.execute("""
+        SELECT SUM(phishing), AVG(phishing), MAX(phishing), MIN(phishing)
+        FROM usuarios
+        WHERE es_contrasena_debil = 0
+    """)
+    result = cur.fetchone()
+    emails_sum = result[0]
+    emails_avg = result[1]
+    emails_max = result[2]
+    emails_min = result[3]
+    return emails_sum,emails_avg,emails_max,emails_min
+
+def sum_media_max_min_phising_pass_debil(cur):
+    cur.execute("""
+        SELECT SUM(phishing), AVG(phishing), MAX(phishing), MIN(phishing)
+        FROM usuarios
+        WHERE es_contrasena_debil = 1
+    """)
+    result = cur.fetchone()
+    emails_sum = result[0]
+    emails_avg = result[1]
+    emails_max = result[2]
+    emails_min = result[3]
+    return emails_sum, emails_avg, emails_max, emails_min
+
+def mediana_varianza_phishing_usuarios(cur):
+    cur.execute("""
+        SELECT phishing
+        FROM usuarios
+        WHERE permisos = 0
+        GROUP BY username
+    """)
+    result = cur.fetchall()
+    emails = [row[0] for row in result]
+    emails_median = statistics.median(emails)
+    emails_variance = statistics.variance(emails)
+    #print(emails_median,emails_variance)
+    return emails_median,emails_variance
+#mediana_varianza_phishing_usuarios(cur)
+def mediana_varianza_phishing_admin(cur):
+    cur.execute("""
+        SELECT phishing
+        FROM usuarios
+        WHERE permisos = 1
+        GROUP BY username
+    """)
+    result = cur.fetchall()
+    emails = [row[0] for row in result]
+    emails_median = statistics.median(emails)
+    emails_variance = statistics.variance(emails)
+    return emails_median,emails_variance
+
+def mediana_varianza_phishing_pass_fuerte(cur):
+    cur.execute("""
+        SELECT phishing
+        FROM usuarios
+        WHERE es_contrasena_debil = 0
+        GROUP BY username
+    """)
+    result = cur.fetchall()
+    emails = [row[0] for row in result]
+    emails_median = statistics.median(emails)
+    emails_variance = statistics.variance(emails)
+    return emails_median,emails_variance
+
+def mediana_varianza_phising_pass_debil(cur):
+    cur.execute("""
+        SELECT phishing
+        FROM usuarios
+        WHERE es_contrasena_debil = 1
+        GROUP BY username
+    """)
+    result = cur.fetchall()
+    emails = [row[0] for row in result]
+    emails_median = statistics.median(emails)
+    emails_variance = statistics.variance(emails)
+    return emails_median,emails_variance
+
+
 
 
 
