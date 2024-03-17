@@ -5,6 +5,11 @@
     <div class="mx-auto mb-3" style="text-align: center; font-weight: bold; font-size: 24px;">Ejercicio 3</div>
 
     <div class="mx-auto">
+    <!-- Gráfico de tiempo medio cambio contraseñas -->
+    <canvas id="mediaCambioPassUsuariosChart"></canvas>
+    </div>
+
+    <div class="mx-auto">
         <!-- Gráfica de puntuaciones de usuarios críticos -->
         <canvas id="usuariosCriticosChart"></canvas>
     </div>
@@ -23,8 +28,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // JavaScript para crear las gráficas utilizando Chart.js
+
         // Datos recibidos desde app.py
+        var mediaUsers = {{ mediaUsers|safe }};
+        var mediaAdmin = {{ mediaAdmin|safe }};
         var users = {{ users|safe }};
         var punt = {{ punt|safe }};
         var pag = {{ pag|safe }};
@@ -32,6 +39,31 @@
         var an = {{ an|safe }};
         var cum = {{ cum|safe }};
         var no_cum = {{ no_cum|safe }};
+
+
+        //Gráfica media tiempo cambio contraseñas usuarios y administradores
+        var mediaCambioPassUsuariosCtx = document.getElementById('mediaCambioPassUsuariosChart').getContext('2d');
+        new Chart(mediaCambioPassUsuariosCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Usuarios', 'Administradores'],
+                datasets: [{
+                    label: 'Media de tiempo de cambio de contraseña',
+                    data: [mediaUsers, mediaAdmin],
+                    backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)'],
+                    borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
 
         // Gráfica de puntuaciones de usuarios críticos
         var usuariosCriticosCtx = document.getElementById('usuariosCriticosChart').getContext('2d');

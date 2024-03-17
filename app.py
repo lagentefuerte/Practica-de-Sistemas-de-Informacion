@@ -49,22 +49,27 @@ def resultadosEj3():
     con=conectar_base_datos()
     cur=con.cursor()
 
-    #la primera consulta
+    media_cambio_pass_usuarios,media_cambio_pass_admin=calcular_media_tiempo_cambio_contrasena_por_usuario(cur)
     users, punt = calcular_puntuaciones_usuarios_criticos(cur)
     pag, politicas = calcular_politicas_desactualizadas(cur)
     anio, cumplen, no_cumplen = calcular_cumplimiento_politicas_por_anio(cur)
 
+
+    media_cambio_pass_usuarios_json=json.dumps(media_cambio_pass_usuarios)
+    media_cambio_pass_admin_json = json.dumps(media_cambio_pass_admin)
     users_json = json.dumps(users)
     punt_json = json.dumps(punt)
     pag_json = json.dumps(pag)
     politicas_json = json.dumps(politicas)
-    an_json = json.dumps(an)
-    cum_json = json.dumps(cum)
-    no_cum_json = json.dumps(no_cum)
+    an_json = json.dumps(anio)
+    cum_json = json.dumps(cumplen)
+    no_cum_json = json.dumps(no_cumplen)
+
 
 
     con.close()
     return render_template("Ej3.html",
+                           mediaUsers=media_cambio_pass_usuarios_json,mediaAdmin=media_cambio_pass_admin_json,
                            users=users_json, punt=punt_json,
                            pag=pag_json, politicas=politicas_json,
                            an=an_json, cum=cum_json, no_cum=no_cum_json)

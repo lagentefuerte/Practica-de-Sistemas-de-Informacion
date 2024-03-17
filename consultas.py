@@ -72,12 +72,15 @@ con.commit()
 f.close()
 
 
+#######################                 EJERCICIO 2
+
 def num_muestras(cur):
     cur.execute("SELECT COUNT(*) from usuarios")
     numUs= cur.fetchall()[0][0]
-    print("Numero de usuarios:",numUs)
+    #print("Numero de usuarios:",numUs)
     return numUs
-num_muestras(cur)
+#num_muestras(cur)
+
 # Obtener el número de fechas distintas por usuario en las que se ha cambiado la contraseña
 def media_desviacion_fechas_cambio_contrasena(cur):
     cur.execute("""
@@ -92,10 +95,10 @@ def media_desviacion_fechas_cambio_contrasena(cur):
     media_fechas_cambio_contraseña = statistics.mean(num_fechas_cambio_contraseña_por_usuario)
     desviacion_estandar_fechas_cambio_contraseña = statistics.stdev(num_fechas_cambio_contraseña_por_usuario)
 
-    print("Media de fechas de cambio de contraseña por usuario:", media_fechas_cambio_contraseña)
-    print("Desviación estándar de fechas de cambio de contraseña por usuario:",desviacion_estandar_fechas_cambio_contraseña)
-    return media_fechas_cambio_contraseña,desviacion_estandar_fechas_cambio_contraseña
-media_desviacion_fechas_cambio_contrasena(cur)
+    #print("Media de fechas de cambio de contraseña por usuario:", media_fechas_cambio_contraseña)
+    #print("Desviación estándar de fechas de cambio de contraseña por usuario:",desviacion_estandar_fechas_cambio_contraseña)
+    return round(media_fechas_cambio_contraseña,3),round(desviacion_estandar_fechas_cambio_contraseña,3)
+#media_desviacion_fechas_cambio_contrasena(cur)
 
 def media_desv_ips_detectadas(cur):
     cur.execute("""
@@ -113,10 +116,10 @@ def media_desv_ips_detectadas(cur):
     media_ips_cambio_contraseña = statistics.mean(num_ips_cambio_contraseña_por_usuario)
     desviacion_estandar_ips_cambio_contraseña = statistics.stdev(num_ips_cambio_contraseña_por_usuario)
 
-    print("Media de IPs de cambio de contraseña por usuario:", media_ips_cambio_contraseña)
-    print("Desviación estándar de IPs de cambio de contraseña por usuario:", desviacion_estandar_ips_cambio_contraseña)
-    return media_ips_cambio_contraseña,desviacion_estandar_ips_cambio_contraseña
-media_desv_ips_detectadas(cur)
+    #print("Media de IPs de cambio de contraseña por usuario:", media_ips_cambio_contraseña)
+    #print("Desviación estándar de IPs de cambio de contraseña por usuario:", desviacion_estandar_ips_cambio_contraseña)
+    return round(media_ips_cambio_contraseña,3),round(desviacion_estandar_ips_cambio_contraseña,3)
+#media_desv_ips_detectadas(cur)
 
 def media_desv_phising(cur):
     # Obtener el número de emails de phishing para cada usuario
@@ -128,10 +131,10 @@ def media_desv_phising(cur):
 
     media_emails_phishing = statistics.mean(num_emails_phishing_por_usuario)
     desviacion_estandar_emails_phishing = statistics.stdev(num_emails_phishing_por_usuario)
-    print("Media de emails de phishing por usuario:", media_emails_phishing)
-    print("Desviación estándar de emails de phishing por usuario:", desviacion_estandar_emails_phishing)
-    return media_emails_phishing,desviacion_estandar_emails_phishing
-media_desv_phising(cur)
+    #print("Media de emails de phishing por usuario:", media_emails_phishing)
+    #print("Desviación estándar de emails de phishing por usuario:", desviacion_estandar_emails_phishing)
+    return round(media_emails_phishing,3),round(desviacion_estandar_emails_phishing,3)
+#media_desv_phising(cur)
 
 def min_max_emails_recibidos(cur):
     cur.execute("""
@@ -143,10 +146,10 @@ def min_max_emails_recibidos(cur):
         ) AS total_emails_por_usuario;
     """)
     result = cur.fetchone()
-    print("Valor mínimo de emails recibidos:", result[0])
-    print("Valor máximo de emails recibidos:", result[1])
+    #print("Valor mínimo de emails recibidos:", result[0])
+    #print("Valor máximo de emails recibidos:", result[1])
     return result[0],result[1]
-min_max_emails_recibidos(cur)
+#min_max_emails_recibidos(cur)
 
 def min_max_phising_interactuado_admin(cur):
     # Valor mínimo y valor máximo del número de emails de phishing en los que ha interactuado un administrador
@@ -161,10 +164,14 @@ def min_max_phising_interactuado_admin(cur):
         ) AS emails_phishing_admin;
     """)
     result = cur.fetchone()
-    print("Valor mínimo de emails de phishing de un administrador:", result[0])
-    print("Valor máximo de emails de phishing de un administrador:", result[1])
+    #print("Valor mínimo de emails de phishing de un administrador:", result[0])
+    #print("Valor máximo de emails de phishing de un administrador:", result[1])
     return result[0],result[1]
-min_max_phising_interactuado_admin(cur)
+#min_max_phising_interactuado_admin(cur)
+
+
+
+#######################                 EJERCICIO 3
 
 cur.execute(""" ALTER TABLE usuarios DROP COLUMN es_contrasena_debil
 """)
@@ -294,66 +301,67 @@ emails = [row[0] for row in result]
 emails_median = statistics.median(emails)
 emails_variance = statistics.variance(emails)
 
+
+
+
+#######################                 EJERCICIO 4
+
 def calcular_media_tiempo_cambio_contrasena_por_usuario(cur):
-   query = """
-    SELECT DISTINCT usuarios.username, fecha, permisos
-    FROM usuarios
-    JOIN ipfecha ON usuarios.username = ipfecha.username
-    ORDER BY usuarios.username, fecha
-"""
+    cur.execute('''SELECT DISTINCT usuarios.username, fecha, permisos 
+                FROM usuarios 
+                JOIN ipfecha 
+                ON usuarios.username = ipfecha.username 
+                ORDER BY usuarios.username, fecha''')
+    rows = cur.fetchall()
 
-cur.execute('''SELECT DISTINCT usuarios.username, fecha, permisos 
-            FROM usuarios 
-            JOIN ipfecha 
-            ON usuarios.username = ipfecha.username 
-            ORDER BY usuarios.username, fecha''')
-rows = cur.fetchall()
+    # Diccionario para almacenar las fechas ordenadas por usuario
+    fechas_por_usuario = {}
 
-# Diccionario para almacenar las fechas ordenadas por usuario
-fechas_por_usuario = {}
+    # Iterar sobre las filas y almacenar las fechas ordenadas por usuario
+    for row in rows:
+        user, fecha_str, permiso = row
+        fecha = datetime.strptime(fecha_str, "%d/%m/%Y")
 
-# Iterar sobre las filas y almacenar las fechas ordenadas por usuario
-for row in rows:
-    user, fecha_str, permiso = row
-    fecha = datetime.strptime(fecha_str, "%d/%m/%Y")
+        if user not in fechas_por_usuario:
+            fechas_por_usuario[user] = []
 
-    if user not in fechas_por_usuario:
-        fechas_por_usuario[user] = []
+        fechas_por_usuario[user].append((fecha, permiso))
 
-    fechas_por_usuario[user].append((fecha, permiso))
+    # Diccionario para almacenar los tiempos de cambio de contraseña por permiso
+    tiempos_por_permiso = {}
 
-# Diccionario para almacenar los tiempos de cambio de contraseña por permiso
-tiempos_por_permiso = {}
+    # Iterar sobre las fechas por usuario y calcular los tiempos de cambio de contraseña
+    for user, fechas_permisos in fechas_por_usuario.items():
+        fechas_permisos.sort()  # Ordenar las fechas
 
-# Iterar sobre las fechas por usuario y calcular los tiempos de cambio de contraseña
-for user, fechas_permisos in fechas_por_usuario.items():
-    fechas_permisos.sort()  # Ordenar las fechas
+        for i in range(1, len(fechas_permisos)):
+            fecha_anterior, permiso_anterior = fechas_permisos[i - 1]
+            fecha_actual, permiso_actual = fechas_permisos[i]
 
-    for i in range(1, len(fechas_permisos)):
-        fecha_anterior, permiso_anterior = fechas_permisos[i - 1]
-        fecha_actual, permiso_actual = fechas_permisos[i]
+            # Verificar si es el mismo permiso
+            if permiso_actual == permiso_anterior:
+                # Calcular la diferencia de tiempo entre fechas consecutivas
+                tiempo_cambio = fecha_actual - fecha_anterior
 
-        # Verificar si es el mismo permiso
-        if permiso_actual == permiso_anterior:
-            # Calcular la diferencia de tiempo entre fechas consecutivas
-            tiempo_cambio = fecha_actual - fecha_anterior
+                # Agregar el tiempo de cambio a la lista correspondiente
+                if permiso_actual not in tiempos_por_permiso:
+                    tiempos_por_permiso[permiso_actual] = []
 
-            # Agregar el tiempo de cambio a la lista correspondiente
-            if permiso_actual not in tiempos_por_permiso:
-                tiempos_por_permiso[permiso_actual] = []
+                tiempos_por_permiso[permiso_actual].append(tiempo_cambio.days)
 
-            tiempos_por_permiso[permiso_actual].append(tiempo_cambio.days)
+    # Calcular la media de los tiempos de cambio de contraseña por permiso
+    medias_por_permiso = {}
+    for permiso, tiempos in tiempos_por_permiso.items():
+        media_tiempo = sum(tiempos) / len(tiempos)
+        medias_por_permiso[permiso] = media_tiempo
 
-# Calcular la media de los tiempos de cambio de contraseña por permiso
-medias_por_permiso = {}
-for permiso, tiempos in tiempos_por_permiso.items():
-    media_tiempo = sum(tiempos) / len(tiempos)
-    medias_por_permiso[permiso] = media_tiempo
+    medias=[]
+    for permiso, media in medias_por_permiso.items():
+        #print(f"Media de tiempo de cambio de contraseña para permiso {permiso}: {media:.2f} días")
+        medias.append(round(media,2))
+    return medias[0],medias[1]
 
-# Imprimir la media de tiempo de cambio de contraseña por permiso
-for permiso, media in medias_por_permiso.items():
-    print(f"Media de tiempo de cambio de contraseña para permiso {permiso}: {media:.2f} días")
-
+#calcular_media_tiempo_cambio_contrasena_por_usuario(cur)
 
 def calcular_puntuaciones_usuarios_criticos(cur): #la puntuación hay que multiplicar por 100 el nº de fishing para que no de 0, algo; da directamente la probabilidad
     cur.execute("""
@@ -365,14 +373,14 @@ def calcular_puntuaciones_usuarios_criticos(cur): #la puntuación hay que multip
     resultados = cur.fetchall()
     usuarios = [row[0] for row in resultados]
     puntuaciones = [row[1] for row in resultados]
-    print("usuarios",end="")
-    print(usuarios)
-    print("puntuaciones",end="")
-    print(puntuaciones)
+    #print("usuarios",end="")
+    #print(usuarios)
+    #print("puntuaciones",end="")
+    #print(puntuaciones)
     return usuarios, puntuaciones
 
 
-users,punt=calcular_puntuaciones_usuarios_criticos(cur)
+#users,punt=calcular_puntuaciones_usuarios_criticos(cur)
 
 def calcular_politicas_desactualizadas(cur): #que es desactualizada, menor a que año?
     cur.execute("""
@@ -385,12 +393,12 @@ def calcular_politicas_desactualizadas(cur): #que es desactualizada, menor a que
     resultados = cur.fetchall()
     paginas_web = [row[0] for row in resultados]
     politicas = [row[1] for row in resultados]
-    print("paginas web", end="")
-    print(paginas_web)
-    print("politicas", end="")
-    print(politicas) #en base al numero de politicas que tiene
+    #print("paginas web", end="")
+    #print(paginas_web)
+    #print("politicas", end="")
+    #print(politicas) #en base al numero de politicas que tiene
     return paginas_web, politicas
-pag,politicas=calcular_politicas_desactualizadas(cur)
+#pag,politicas=calcular_politicas_desactualizadas(cur)
 
 
 def calcular_cumplimiento_politicas_por_anio(cur):
@@ -405,13 +413,16 @@ def calcular_cumplimiento_politicas_por_anio(cur):
     anios = [row[0] for row in resultados]
     cumplen = [row[1] for row in resultados]
     no_cumplen = [row[2] for row in resultados]
-    print("años", end="")
-    print(anios)
-    print("cumplen politicas", end="")
-    print(cumplen)
-    print("no cumplen todas las politicas", end="")
-    print(no_cumplen)
+    #print("años", end="")
+    #print(anios)
+    #print("cumplen politicas", end="")
+    #print(cumplen)
+    #print("no cumplen todas las politicas", end="")
+    #print(no_cumplen)
     return anios, cumplen, no_cumplen
 
-an,cum,no_cum=calcular_cumplimiento_politicas_por_anio(cur)
+#an,cum,no_cum=calcular_cumplimiento_politicas_por_anio(cur)
+
+
+
 con.close()
