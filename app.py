@@ -72,8 +72,8 @@ def resultadosEj2():
 
     data = {
         "usuarios": {
-            "observaciones": json.dumps(observaciones_usuarios),
-            "suma": json.dumps(sumUs),
+            "missing": json.dumps(observaciones_usuarios),
+            "observaciones": json.dumps(sumUs),
             "media": json.dumps(mediaUs),
             "maximo": json.dumps(maxUs),
             "minimo": json.dumps(minUS),
@@ -81,8 +81,8 @@ def resultadosEj2():
             "varianza": json.dumps(varianzaUs)
         },
         "admin": {
-            "observaciones": json.dumps(observaciones_admin),
-            "suma": json.dumps(sumAd),
+            "missing": json.dumps(observaciones_admin),
+            "observaciones": json.dumps(sumAd),
             "media": json.dumps(mediaAd),
             "maximo": json.dumps(maxAd),
             "minimo": json.dumps(minAd),
@@ -90,8 +90,8 @@ def resultadosEj2():
             "varianza": json.dumps(varianzaAd)
         },
         "debil": {
-            "observaciones": json.dumps(observaciones_pass_debil),
-            "suma": json.dumps(sumDebil),
+            "missing": json.dumps(observaciones_pass_debil),
+            "observaciones": json.dumps(sumDebil),
             "media": json.dumps(mediaDebil),
             "maximo": json.dumps(maxDebil),
             "minimo": json.dumps(minDebil),
@@ -99,8 +99,8 @@ def resultadosEj2():
             "varianza": json.dumps(varianzaDebil)
         },
         "fuerte": {
-            "observaciones": json.dumps(observaciones_pass_fuerte),
-            "suma": json.dumps(sumFuerte),
+            "missing": json.dumps(observaciones_pass_fuerte),
+            "observaciones": json.dumps(sumFuerte),
             "media": json.dumps(mediaFuerte),
             "maximo": json.dumps(maxFuerte),
             "minimo": json.dumps(minFuerte),
