@@ -410,13 +410,13 @@ def calcular_media_tiempo_cambio_contrasena_por_usuario(cur):
 
 #calcular_media_tiempo_cambio_contrasena_por_usuario(cur)
 
-def calcular_puntuaciones_usuarios_criticos(cur): #la puntuación hay que multiplicar por 100 el nº de fishing para que no de 0, algo; da directamente la probabilidad
+def calcular_puntuaciones_usuarios_criticos(cur, num): #la puntuación hay que multiplicar por 100 el nº de fishing para que no de 0, algo; da directamente la probabilidad
     cur.execute("""
         SELECT username, (phishing*100 / total) AS puntuacion
         FROM usuarios WHERE es_contrasena_debil==1
         ORDER BY puntuacion DESC
-        LIMIT 10
-    """)
+        LIMIT ?
+    """, int(num))
     resultados = cur.fetchall()
     usuarios = [row[0] for row in resultados]
     puntuaciones = [row[1] for row in resultados]
@@ -429,14 +429,14 @@ def calcular_puntuaciones_usuarios_criticos(cur): #la puntuación hay que multip
 
 #users,punt=calcular_puntuaciones_usuarios_criticos(cur)
 
-def calcular_politicas_desactualizadas(cur): #que es desactualizada, menor a que año?
+def calcular_politicas_desactualizadas(cur, num): #que es desactualizada, menor a que año?
     cur.execute("""
         SELECT url, SUM(cookies + aviso + proteccionDatos) AS politicas_desactualizadas
-        FROM legalData WHERE creacion<2017
+        FROM legalData
         GROUP BY url
         ORDER BY politicas_desactualizadas DESC
-        LIMIT 5
-    """)
+        LIMIT ?
+    """, int(num))
     resultados = cur.fetchall()
     paginas_web = [row[0] for row in resultados]
     politicas = [row[1] for row in resultados]
