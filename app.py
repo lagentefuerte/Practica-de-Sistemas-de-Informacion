@@ -148,11 +148,12 @@ def resultadosEj3():
                            an=an_json, cum=cum_json, no_cum=no_cum_json)
 
 
-@approute('/topusuarios', methods=['GET']) #peticion get /topusuarios?num=x
+@app.route('/topusuarios', methods=['GET']) #peticion get /topusuarios?num=x
 def ejercicio1():
     calcular_puntuaciones_usuarios_criticos(cur, request.args.get('num'))
 
-@approute('/webvulnerables', methods=['GET']) #peticion get /webvulnerables?num=x
+
+@app.route('/webvulnerables', methods=['GET']) #peticion get /webvulnerables?num=x
 def ejercicio11():
     calcular_politicas_desactualizadas(cur, request.args.get('num'))
 
