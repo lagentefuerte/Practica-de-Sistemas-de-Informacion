@@ -1,5 +1,5 @@
 import sqlite3
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import json
 import pandas as pd
 from consultas import *
@@ -148,6 +148,13 @@ def resultadosEj3():
                            an=an_json, cum=cum_json, no_cum=no_cum_json)
 
 
+@approute('/topusuarios', methods=['GET']) #peticion get /topusuarios?num=x
+def ejercicio1():
+    calcular_puntuaciones_usuarios_criticos(cur, request.args.get('num'))
+
+@approute('/webvulnerables', methods=['GET']) #peticion get /webvulnerables?num=x
+def ejercicio11():
+    calcular_politicas_desactualizadas(cur, request.args.get('num'))
 
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
