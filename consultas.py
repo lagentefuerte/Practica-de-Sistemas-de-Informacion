@@ -470,6 +470,20 @@ def calcular_cumplimiento_politicas_por_anio(cur):
 
 #an,cum,no_cum=calcular_cumplimiento_politicas_por_anio(cur)
 
-
+def top50percent(cur, string): #la puntuación hay que multiplicar por 100 el nº de fishing para que no de 0, algo; da directamente la probabilidad
+    cur.execute("""
+        SELECT username, (cliclados / phishing) AS puntuacion
+        FROM usuarios WHERE es_contrasena_debil==1
+        ORDER BY puntuacion ?
+        LIMIT 15
+    """, string)
+    resultados = cur.fetchall()
+    usuarios = [row[0] for row in resultados]
+    puntuaciones = [row[1] for row in resultados]
+    #print("usuarios",end="")
+    #print(usuarios)
+    #print("puntuaciones",end="")
+    #print(puntuaciones)
+    return usuarios, puntuaciones
 
 con.close()

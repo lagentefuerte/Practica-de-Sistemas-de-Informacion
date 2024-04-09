@@ -157,5 +157,12 @@ def ejercicio1():
 def ejercicio11():
     calcular_politicas_desactualizadas(cur, request.args.get('num'))
 
+@app.route('/top50', methods=['GET']) #peticion get /top50?string=(true/false)
+def ejercicio2():
+    if (request.args.get('string') == "true"):
+        top50percent(cur, "DESC")
+    else:
+            top50percent(cur, "ASC")
+
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
