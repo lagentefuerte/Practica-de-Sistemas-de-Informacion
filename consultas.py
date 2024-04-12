@@ -4,7 +4,7 @@ import statistics
 import hashlib
 from datetime import datetime
 
-import pandas as pd
+
 import matplotlib.pyplot as plt
 
 def calcularMD5 (cadena):
@@ -410,9 +410,8 @@ def calcular_media_tiempo_cambio_contrasena_por_usuario(cur):
 
 #calcular_media_tiempo_cambio_contrasena_por_usuario(cur)
 
-def calcular_puntuaciones_usuarios_criticos(cur, num): #la puntuación hay que multiplicar por 100 el nº de fishing para que no de 0, algo; da directamente la probabilidad
-    cur.execute("""
-        SELECT username, (phishing*100 / total) AS puntuacion
+def calcular_puntuaciones_usuarios_criticosOriginal(cur, num): #la puntuación hay que multiplicar por 100 el nº de fishing para que no de 0, algo; da directamente la probabilidad
+    cur.execute("""SELECT username, (phishing*100 / total) AS puntuacion
         FROM usuarios WHERE es_contrasena_debil==1
         ORDER BY puntuacion DESC
         LIMIT ?
@@ -426,10 +425,27 @@ def calcular_puntuaciones_usuarios_criticos(cur, num): #la puntuación hay que m
     #print(puntuaciones)
     return usuarios, puntuaciones
 
+def calcular_puntuaciones_usuarios_criticosPrueba(cur, num): #la puntuación hay que multiplicar por 100 el nº de fishing para que no de 0, algo; da directamente la probabilidad
+    consulta_sql = """
+            SELECT username, (phishing*100 / total) AS puntuacion
+            FROM usuarios WHERE es_contrasena_debil==1
+            ORDER BY puntuacion DESC
+            LIMIT ?
+        """
+    cur.execute(consulta_sql, (num,))
+    resultados=cur.fetchall()
+    usuarios = [row[0] for row in resultados]
+    puntuaciones = [row[1] for row in resultados]
+    #print("usuarios",end="")
+    #print(usuarios)
+    #print("puntuaciones",end="")
+    #print(puntuaciones)
+    return usuarios, puntuaciones
+
 
 #users,punt=calcular_puntuaciones_usuarios_criticos(cur)
 
-def calcular_politicas_desactualizadas(cur, num): #que es desactualizada, menor a que año?
+def calcular_politicas_desactualizadasOriginal(cur, num): #que es desactualizada, menor a que año?
     cur.execute("""
         SELECT url, SUM(cookies + aviso + proteccionDatos) AS politicas_desactualizadas
         FROM legalData
@@ -446,6 +462,24 @@ def calcular_politicas_desactualizadas(cur, num): #que es desactualizada, menor 
     #print(politicas) #en base al numero de politicas que tiene
     return paginas_web, politicas
 #pag,politicas=calcular_politicas_desactualizadas(cur)
+
+def calcular_politicas_desactualizadasPrueba(cur, num): #que es desactualizada, menor a que año?
+    consulta="""
+        SELECT url, SUM(cookies + aviso + proteccionDatos) AS politicas_desactualizadas
+        FROM legalData
+        GROUP BY url
+        ORDER BY politicas_desactualizadas DESC
+        LIMIT ?
+    """
+    cur.execute(consulta,(num,))
+    resultados = cur.fetchall()
+    paginas_web = [row[0] for row in resultados]
+    politicas = [row[1] for row in resultados]
+    #print("paginas web", end="")
+    #print(paginas_web)
+    #print("politicas", end="")
+    #print(politicas) #en base al numero de politicas que tiene
+    return paginas_web, politicas
 
 
 def calcular_cumplimiento_politicas_por_anio(cur):
