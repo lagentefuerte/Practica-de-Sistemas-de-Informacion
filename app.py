@@ -1,6 +1,7 @@
-import sqlite3
+import sqlite3,requests
 from flask import Flask, render_template, request,redirect,url_for
 import json
+
 
 from consultas import *
 import json
@@ -40,14 +41,18 @@ def resultados(num):
     cur.close()
     return render_template('Ejercicio1.html', usuarios=usuarios, puntuaciones=puntuaciones,pag=paginas_web, politicas=politicas)
 
-#@app.route('/vulnerable', methods=['GET']) #peticion get /topusuarios?num=x
-#def ejercicio1():
- #   con = conectar_base_datos()
-  #  cur = con.cursor()
-   # calcular_puntuaciones_usuarios_criticos(cur, request.args.get('num'))
-    #calcular_politicas_desactualizadas(cur, request.args.get('num'))
 
+@app.route('/last10vulnerabilities') #el json que devuelve se interpreta bien o no viene descripción?
+def vulnerabilidades():
+    response = requests.get('https://cve.circl.lu/api/last')
+    data = response.json()
+    last_10_entries = data[:10]
 
+    #PARA VER EL FORMATO DEL JSON QUE SE OBTIENE
+    #with open('last_10_vulnerabilities.json', 'w') as json_file:
+     #   json.dump(last_10_entries, json_file)
+
+    return render_template('Ejercicio3.html',datos=last_10_entries)
 
 @app.route('/top50', methods=['GET']) #peticion get /top50?string=(true/false)
 def ejercicio2():

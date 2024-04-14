@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+
+{% block main %}
+<section class="container mt-2">
+    <div class="mx-auto mb-3" style="text-align: center; font-weight: bold; font-size: 24px;">Ejercicio 3</div>
+     <div class="mx-auto">
+         <!--<h1>Información sacada de la base de datos de CVE-SEARCH PROJECT  </h1>-->
+        {% for entrada in datos %}
+    <h3>Vulnerabilidad {{ loop.index }}</h3>
+    <ul>
+        <li><strong>ID:</strong> {{ entrada.id }}</li>
+        <li><strong>Fecha de Publicación:</strong> {{ entrada.Published }}</li>
+        <li><strong>Fecha de Modificación:</strong> {{ entrada.Modified }}</li>
+        <li><strong>Asignador:</strong> {{ entrada.assigner }}</li>
+        <li><strong>CWE:</strong> {{ entrada.cwe }}</li>
+        <li><strong>Referencias:</strong>
+            <ul>
+                {% for referencia in entrada.references %}
+                <li><a href="{{ referencia }}">{{ referencia }}</a></li>
+                {% endfor %}
+            </ul>
+        </li>
+        <li><strong>Resumen:</strong> {{ entrada.summary }}</li>
+    </ul>
+         {% endfor %}
+    </div>
+
+</section>
+{% endblock %}
