@@ -7,6 +7,7 @@
     <div class="mx-auto">
         <!-- Gráfica de puntuaciones de usuarios críticos -->
         <canvas id="usuariosCriticosChart"></canvas>
+        <canvas id="usuariosCriticosChartMayores"></canvas>
     </div>
 
 
@@ -41,6 +42,30 @@
             }
         }
     });
+    var usersMayores = {{ usuariosMayor|safe }};
+    var puntMayores = {{ puntMayor|safe }};
+    var usuariosCriticosCtxMayores = document.getElementById('usuariosCriticosChartMayores').getContext('2d');
+    new Chart(usuariosCriticosCtxMayores, {
+        type: 'bar',
+        data: {
+            labels: usersMayores,
+            datasets: [{
+                label: 'Puntuaciones de usuarios críticos',
+                data: puntMayores,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
 
 </script>
 {% endblock %}
