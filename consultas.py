@@ -443,9 +443,11 @@ def calcular_puntuaciones_usuarios_criticosPrueba(cur, num): #la puntuación hay
     return usuarios, puntuaciones
 
 def calcular_puntuaciones_usuarios_criticosMayor50(cur):
+
+
     consulta_sql = """
             SELECT username, (phishing * 100 / total) AS puntuacion
-            FROM usuarios WHERE ((cliclados/phishing)*100 >50)
+            FROM usuarios WHERE (((cliclados * 100 / phishing)) < 50)
             ORDER BY puntuacion DESC
         """
     cur.execute(consulta_sql)
@@ -453,7 +455,6 @@ def calcular_puntuaciones_usuarios_criticosMayor50(cur):
     usuarios = [row[0] for row in resultados]
     puntuaciones = [row[1] for row in resultados]
     return usuarios, puntuaciones
-#users,punt=calcular_puntuaciones_usuarios_criticos(cur)
 
 def calcular_politicas_desactualizadasOriginal(cur, num): #que es desactualizada, menor a que año?
     cur.execute("""
