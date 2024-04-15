@@ -41,7 +41,7 @@ def usuarios(num):
     cur = con.cursor()
 
     usuarios, puntuaciones = calcular_puntuaciones_usuarios_criticosPrueba(cur, num)
-
+    usuariosMayor,puntMayor = calcular_puntuaciones_usuarios_criticosMayor50(cur,num)
     cur.close()
     return render_template('UsuariosCriticos.html', usuarios=usuarios, puntuaciones=puntuaciones)
 

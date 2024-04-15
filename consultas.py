@@ -442,7 +442,22 @@ def calcular_puntuaciones_usuarios_criticosPrueba(cur, num): #la puntuación hay
     #print(puntuaciones)
     return usuarios, puntuaciones
 
-
+def calcular_puntuaciones_usuarios_criticosMayor50(cur, num): #la puntuación hay que multiplicar por 100 el nº de fishing para que no de 0, algo; da directamente la probabilidad
+    consulta_sql = """
+            SELECT username, (phishing*100 / total) >50 AS puntuacion
+            FROM usuarios WHERE (es_contrasena_debil==1 OR es_contrasena_debil=0)
+            ORDER BY puntuacion DESC
+            LIMIT ?
+        """
+    cur.execute(consulta_sql, (num,))
+    resultados=cur.fetchall()
+    usuarios = [row[0] for row in resultados]
+    puntuaciones = [row[1] for row in resultados]
+    #print("usuarios",end="")
+    #print(usuarios)
+    #print("puntuaciones",end="")
+    #print(puntuaciones)
+    return usuarios, puntuaciones
 #users,punt=calcular_puntuaciones_usuarios_criticos(cur)
 
 def calcular_politicas_desactualizadasOriginal(cur, num): #que es desactualizada, menor a que año?
