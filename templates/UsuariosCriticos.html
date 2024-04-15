@@ -2,17 +2,14 @@
 
 {% block main %}
 <section class="container mt-2">
-    <div class="mx-auto mb-3" style="text-align: center; font-weight: bold; font-size: 24px;">Ejercicio 1</div>
+    <div class="mx-auto mb-3" style="text-align: center; font-weight: bold; font-size: 24px;">Usuarios Criticos</div>
 
     <div class="mx-auto">
         <!-- Gráfica de puntuaciones de usuarios críticos -->
         <canvas id="usuariosCriticosChart"></canvas>
     </div>
 
-    <div class="mx-auto">
-        <!-- Gráfica de políticas desactualizadas -->
-        <canvas id="politicasDesactualizadasChart"></canvas>
-    </div>
+
 </section>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -20,8 +17,7 @@
     //Datos
     var users = {{ usuarios|safe }};
     var punt = {{ puntuaciones|safe }};
-    var pag = {{ pag|safe }};
-    var politicas = {{ politicas|safe }};
+
 
     // Gráfica de puntuaciones de usuarios críticos
     var usuariosCriticosCtx = document.getElementById('usuariosCriticosChart').getContext('2d');
@@ -46,27 +42,5 @@
         }
     });
 
-    // Gráfica de políticas desactualizadas
-    var politicasDesactualizadasCtx = document.getElementById('politicasDesactualizadasChart').getContext('2d');
-    var politicasDesactualizadasChart = new Chart(politicasDesactualizadasCtx, {
-        type: 'bar',
-        data: {
-            labels: pag,
-            datasets: [{
-                label: 'Políticas desactualizadas',
-                data: politicas,
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
 </script>
 {% endblock %}

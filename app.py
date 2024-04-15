@@ -18,31 +18,45 @@ def conectar_base_datos():
 def indice():
     return render_template("resultados.html")
 
-@app.route('/formulario')
-def mostrar_formulario():
-    return render_template('formulario.html')
+@app.route('/formulario/<destino>')
+def mostrar_formulario(destino):
+    return render_template('formulario.html',destino=destino)
 
 # Ruta para procesar el número ingresado por el usuario
-@app.route('/procesar_numero', methods=['POST'])
-def procesar_numero():
+@app.route('/procesar_numero/<destino>', methods=['POST'])
+def procesar_numero(destino):
     if request.method == 'POST':
         numero = request.form['numero']  # Obtener el número del formulario
-        return redirect(url_for('resultados', num=numero))  # Redireccionar a la página de resultados con el número como parámetro
+        if destino == 'critico':
+            # Redireccionar a la página de resultados para usuarios críticos con el número como parámetro
+            return redirect(url_for('usuarios', num=numero))
+        elif destino == 'politicas':
+            # Redireccionar a la página de resultados para políticas con el número como parámetro
+            return redirect(url_for('politicas', num=numero))
 
 # Ruta para mostrar los resultados
 @app.route('/vulnerable/<int:num>')
-def resultados(num):
+def usuarios(num):
     con = conectar_base_datos()
     cur = con.cursor()
 
     usuarios, puntuaciones = calcular_puntuaciones_usuarios_criticosPrueba(cur, num)
 
+    cur.close()
+    return render_template('UsuariosCriticos.html', usuarios=usuarios, puntuaciones=puntuaciones)
+
+@app.route('/vulnerable/<int:num>')
+def politicas(num):
+    con = conectar_base_datos()
+    cur = con.cursor()
+
     paginas_web, politicas = calcular_politicas_desactualizadasPrueba(cur, num)
     cur.close()
-    return render_template('Ejercicio1.html', usuarios=usuarios, puntuaciones=puntuaciones,pag=paginas_web, politicas=politicas)
+    return render_template('UsuariosCriticos.html',pag=paginas_web, politicas=politicas)
 
 
-@app.route('/last10vulnerabilities') #el json que devuelve se interpreta bien o no viene descripción?
+
+@app.route('/last10vulnerabilities')
 def vulnerabilidades():
     response = requests.get('https://cve.circl.lu/api/last')
     data = response.json()

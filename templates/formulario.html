@@ -4,8 +4,8 @@
 <div class="container mt-2">
     <div class="mx-auto mb-3" style="text-align: center; font-weight: bold; font-size: 24px;">Ejercicio 1</div>
 
-    <h2>Ingrese el número:</h2>
-    <form action="/procesar_numero" method="post">
+    <h2>Indica el número de elementos que se desean observar:</h2>
+    <form action="/procesar_numero/{{ destino }}" method="post">
         <input type="number" name="numero" required>
         <button type="submit">Enviar</button>
     </form>
