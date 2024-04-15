@@ -479,9 +479,10 @@ def calcular_politicas_desactualizadasPrueba(cur, num): #que es desactualizada, 
         SELECT url, SUM(cookies + aviso + proteccionDatos) AS politicas_desactualizadas
         FROM legalData
         GROUP BY url
-        ORDER BY politicas_desactualizadas DESC
+        ORDER BY politicas_desactualizadas ASC,creacion ASC
         LIMIT ?
     """
+    #Ordenarlo por ascendentes coge los que no tienen los valores de cookie, avisos o proteccion de datos
     cur.execute(consulta,(num,))
     resultados = cur.fetchall()
     paginas_web = [row[0] for row in resultados]
