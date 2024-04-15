@@ -41,9 +41,10 @@ def usuarios(num):
     cur = con.cursor()
 
     usuarios, puntuaciones = calcular_puntuaciones_usuarios_criticosPrueba(cur, num)
-    usuariosMayor,puntMayor = calcular_puntuaciones_usuarios_criticosMayor50(cur)
+    usuariosMayor,puntMayor = calcular_puntuaciones_usuarios_Mayor50(cur)
+    usuariosMenor,puntMenor = calcular_puntuaciones_usuarios_Menor50(cur)
     cur.close()
-    return render_template('UsuariosCriticos.html', usuarios=usuarios, puntuaciones=puntuaciones,usuariosMayor=usuariosMayor,puntMayor=puntMayor)
+    return render_template('UsuariosCriticos.html', usuarios=usuarios, puntuaciones=puntuaciones,usuariosMayor=usuariosMayor,puntMayor=puntMayor,usuariosMenor=usuariosMenor,puntMenor=puntMenor)
 
 @app.route('/politicasDesactualizadas/<int:num>')
 def politicas(num):

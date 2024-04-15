@@ -442,7 +442,20 @@ def calcular_puntuaciones_usuarios_criticosPrueba(cur, num): #la puntuación hay
     #print(puntuaciones)
     return usuarios, puntuaciones
 
-def calcular_puntuaciones_usuarios_criticosMayor50(cur):
+def calcular_puntuaciones_usuarios_Mayor50(cur):
+
+
+    consulta_sql = """
+            SELECT username, (phishing * 100 / total) AS puntuacion
+            FROM usuarios WHERE (((cliclados * 100 / phishing)) > 50)
+            ORDER BY puntuacion DESC
+        """
+    cur.execute(consulta_sql)
+    resultados = cur.fetchall()
+    usuarios = [row[0] for row in resultados]
+    puntuaciones = [row[1] for row in resultados]
+    return usuarios, puntuaciones
+def calcular_puntuaciones_usuarios_Menor50(cur):
 
 
     consulta_sql = """

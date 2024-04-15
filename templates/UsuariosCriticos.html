@@ -2,27 +2,51 @@
 
 {% block main %}
 <section class="container mt-2">
-    <div class="mx-auto mb-3" style="text-align: center; font-weight: bold; font-size: 24px;">Usuarios Criticos</div>
+    <div class="mx-auto mb-3" style="text-align: center; font-weight: bold; font-size: 24px;">Usuarios Críticos</div>
 
     <div class="mx-auto">
-        <!-- Gráfica de puntuaciones de usuarios críticos -->
+        <!-- Gráfico de puntuaciones de usuarios críticos -->
         <canvas id="usuariosCriticosChart"></canvas>
-        <canvas id="usuariosCriticosChartMayores"></canvas>
+        <div class="mt-3">
+            <button id="toggleGraphBtn" onclick="toggleGraph()">Mostrar mayores de 50</button>
+        </div>
+        <canvas id="usuariosCriticosChartMayores" style="display: none;"></canvas>
+        <canvas id="usuariosCriticosChartMenores" style="display: none;"></canvas>
     </div>
-
-
 </section>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    //Datos
+    // Datos
     var users = {{ usuarios|safe }};
     var punt = {{ puntuaciones|safe }};
+    var usersMayores = {{ usuariosMayor|safe }};
+    var puntMayores = {{ puntMayor|safe }};
+    var puntMenores = {{ puntMenor|safe }};
+    var usersMenores ={{ usuariosMenor|safe }};
+    var graphMayoresVisible = false; // Estado inicial del segundo gráfico
 
+    // Función para alternar la visualización del segundo y tercer gráfico
+    function toggleGraph() {
+        var graphMayores = document.getElementById('usuariosCriticosChartMayores');
+        var graphMenores = document.getElementById('usuariosCriticosChartMenores');
 
-    // Gráfica de puntuaciones de usuarios críticos
+        if (!graphMayoresVisible) {
+            graphMayores.style.display = 'block';
+            graphMenores.style.display = 'none';
+            document.getElementById('toggleGraphBtn').innerText = 'Mostrar menores de 50';
+        } else {
+            graphMayores.style.display = 'none';
+            graphMenores.style.display = 'block';
+            document.getElementById('toggleGraphBtn').innerText = 'Mostrar mayores de 50';
+        }
+
+        graphMayoresVisible = !graphMayoresVisible; // Cambiar el estado del segundo gráfico
+    }
+
+    // Gráfico de puntuaciones de usuarios críticos
     var usuariosCriticosCtx = document.getElementById('usuariosCriticosChart').getContext('2d');
-    new Chart(usuariosCriticosCtx, {
+    var usuariosCriticosChart = new Chart(usuariosCriticosCtx, {
         type: 'bar',
         data: {
             labels: users,
@@ -42,10 +66,10 @@
             }
         }
     });
-    var usersMayores = {{ usuariosMayor|safe }};
-    var puntMayores = {{ puntMayor|safe }};
+
+    // Gráfico de puntuaciones de usuarios críticos mayores de 50
     var usuariosCriticosCtxMayores = document.getElementById('usuariosCriticosChartMayores').getContext('2d');
-    new Chart(usuariosCriticosCtxMayores, {
+    var usuariosCriticosChartMayores = new Chart(usuariosCriticosCtxMayores, {
         type: 'bar',
         data: {
             labels: usersMayores,
@@ -66,6 +90,28 @@
         }
     });
 
+    // Gráfico de puntuaciones de usuarios críticos menores de 50
+    var usuariosCriticosCtxMenores = document.getElementById('usuariosCriticosChartMenores').getContext('2d');
+    var usuariosCriticosChartMenores = new Chart(usuariosCriticosCtxMenores, {
+        type: 'bar',
+        data: {
+            labels: usersMenores,
+            datasets: [{
+                label: 'Puntuaciones de usuarios críticos',
+                data: puntMenores,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
 
 </script>
 {% endblock %}
