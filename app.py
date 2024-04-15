@@ -35,7 +35,7 @@ def procesar_numero(destino):
             return redirect(url_for('politicas', num=numero))
 
 # Ruta para mostrar los resultados
-@app.route('/vulnerable/<int:num>')
+@app.route('/usuariosCriticos/<int:num>')
 def usuarios(num):
     con = conectar_base_datos()
     cur = con.cursor()
@@ -45,14 +45,14 @@ def usuarios(num):
     cur.close()
     return render_template('UsuariosCriticos.html', usuarios=usuarios, puntuaciones=puntuaciones,usuariosMayor=usuariosMayor,puntMayor=puntMayor)
 
-@app.route('/vulnerable/<int:num>')
+@app.route('/politicasDesactualizadas/<int:num>')
 def politicas(num):
     con = conectar_base_datos()
     cur = con.cursor()
 
     paginas_web, politicas = calcular_politicas_desactualizadasPrueba(cur, num)
     cur.close()
-    return render_template('UsuariosCriticos.html',pag=paginas_web, politicas=politicas)
+    return render_template('PoliticasDesactualizadas.html',pag=paginas_web, politicas=politicas)
 
 
 
