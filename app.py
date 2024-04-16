@@ -1,4 +1,5 @@
 import sqlite3,requests
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
 from flask import Flask, render_template, request,redirect,url_for
 import json
 
@@ -10,6 +11,13 @@ import json
 
 app = Flask(__name__)
 app.static_folder = 'static'
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+class User(UserMixin):
+    def __init__(self, user_id, name):
+        self.id = user_id
+        self.name = name
 
 def conectar_base_datos():
     return sqlite3.connect('example2.db')
@@ -78,3 +86,4 @@ def ejercicio2():
 
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
+
