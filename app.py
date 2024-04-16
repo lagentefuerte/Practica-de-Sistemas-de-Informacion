@@ -58,14 +58,6 @@ def mostrar_formulario(destino):
 
 @app.route('/procesar_numero/<destino>', methods=['POST'])
 def procesar_numero(destino):
-    """
-    if request.method == 'POST':
-        numero = request.form['numero']  #nº del form
-        if destino == 'critico':
-            return redirect(url_for('usuarios', num=numero))
-        elif destino == 'politicas':
-            return redirect(url_for('politicas', num=numero))
-    """
     if request.method == 'POST':
         numero = request.form['numero']
         try:
