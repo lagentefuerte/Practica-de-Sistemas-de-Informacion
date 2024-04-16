@@ -469,6 +469,58 @@ def calcular_puntuaciones_usuarios_Menor50(cur):
     puntuaciones = [row[1] for row in resultados]
     return usuarios, puntuaciones
 
+def obtenerDatosUsuarios(cur):
+    consulta_sql = """
+        SELECT
+            username,
+            telefono,
+            passwordHash,
+            provincia,
+            permisos,
+            total,
+            phishing,
+            cliclados,
+            es_contrasena_debil
+        FROM
+            usuarios
+    """
+    cur.execute(consulta_sql)
+    resultados = cur.fetchall()
+
+    Datos = {
+        'username': [],
+        'telefono': [],
+        'passwordHash': [],
+        'provincia': [],
+        'permisos': [],
+        'total': [],
+        'phishing': [],
+        'cliclados': [],
+        'contrasenadebil': [],
+        'etiquetas': []
+    }
+
+    # Iterar sobre los resultados y agregarlos al diccionario
+    for fila in resultados:
+        Datos['username'].append(fila[0])
+        Datos['telefono'].append(fila[1])
+        Datos['passwordHash'].append(fila[2])
+        Datos['provincia'].append(fila[3])
+        Datos['permisos'].append(fila[4])
+        Datos['total'].append(fila[5])
+        Datos['phishing'].append(fila[6])
+        Datos['cliclados'].append(fila[7])
+        Datos['contrasenadebil'].append(fila[8])
+
+    # Cargar el archivo JSON
+    with open('users_data_online_clasificado.json', 'r') as f:
+        data = json.load(f)
+
+    for usuario in data['usuarios']:
+        # Obtener el valor del campo "critico" y agregarlo a la lista de etiquetas
+        critico = usuario[list(usuario.keys())[0]]['critico']
+        Datos['etiquetas'].append(critico)
+    return Datos
 def calcular_politicas_desactualizadasOriginal(cur, num): #que es desactualizada, menor a que año?
     cur.execute("""
         SELECT url, SUM(cookies + aviso + proteccionDatos) AS politicas_desactualizadas
@@ -487,7 +539,7 @@ def calcular_politicas_desactualizadasOriginal(cur, num): #que es desactualizada
     return paginas_web, politicas
 #pag,politicas=calcular_politicas_desactualizadas(cur)
 
-def calcular_politicas_desactualizadasPrueba(cur, num): #que es desactualizada, menor a que año?
+def calcular_politicas_desactualizadasPrueba(cur, num):
     consulta="""
         SELECT url, SUM(cookies + aviso + proteccionDatos) AS politicas_desactualizadas
         FROM legalData
