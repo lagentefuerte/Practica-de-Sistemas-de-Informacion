@@ -545,24 +545,21 @@ def top50percent(cur, string): #la puntuación hay que multiplicar por 100 el n�
     #print(puntuaciones)
     return usuarios, puntuaciones
 
-def crearTablaLogin (cur):
+def crearTablaLogin (con, cur):
     cur.execute('''CREATE TABLE IF NOT EXISTS login (
-                        username PRIMARY KEY TEXT,
+                        username TEXT PRIMARY KEY,
                         password TEXT
                     )''')
+    con.commit()
 
 def registrar_usuario(cur, conn, uname, password):
-    cur.execute('''SELECT * FROM login WHERE username = ? ''', uname)
+    cur.execute('''SELECT * FROM login WHERE username = ? ''', (uname,))
     if not cur.fetchone():
-        cur.execute('''INSERT INTO login (username, password) VALUES (?, ?)''', (uname, password))
+        cur.execute('''INSERT OR IGNORE INTO login (username, password) VALUES ('%s','%s')''' % (uname, password))
         conn.commit()
-        print("Usuario registrado con éxito.")
-        con.close()
-
-def login(cur, username, password):
-    cur.execute('''SELECT * FROM usuarios WHERE username = ? AND password = ?''', (username, password))
+        return True
+    return False
+def consultalogin(cur, username, password):
+    cur.execute('''SELECT * FROM login WHERE username = ? AND password = ?''', (username, password))
     usuario = cur.fetchone()
-    if usuario:
-        print("Inicio de sesión exitoso.")
-    else:
-        print("Nombre de usuario o contraseña incorrectos.")
+    return usuario

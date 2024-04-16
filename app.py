@@ -1,26 +1,35 @@
 import sqlite3,requests
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
-from flask import Flask, render_template, request,redirect,url_for
+from flask import Flask, render_template, request, redirect, url_for, abort
 import json
 
 
 from consultas import *
 import json
 
+def conectar_base_datos():
+    return sqlite3.connect('example2.db')
 
+def inicializar ():
+    con = conectar_base_datos()
+    cur = con.cursor()
+    crearTablaLogin(con, cur)
 
 app = Flask(__name__)
 app.static_folder = 'static'
+inicializar()
+app.secret_key = 'clave_muy_secreta'
 login_manager = LoginManager()
 login_manager.init_app(app)
 
 class User(UserMixin):
-    def __init__(self, user_id, name):
+    def __init__(self, user_id):
         self.id = user_id
-        self.name = name
 
-def conectar_base_datos():
-    return sqlite3.connect('example2.db')
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User(user_id)
 
 @app.route('/')
 def indice():
@@ -77,12 +86,49 @@ def vulnerabilidades():
 
     return render_template('Ejercicio3.html',datos=last_10_entries)
 
+@login_required
 @app.route('/top50', methods=['GET']) #peticion get /top50?string=(true/false)
 def ejercicio2():
     if (request.args.get('string') == "true"):
         top50percent(cur, "DESC")
     else:
             top50percent(cur, "ASC")
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    con = conectar_base_datos()
+    cur = con.cursor()
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if consultalogin(cur, username, password):
+            user = User(username)
+            login_user(user)
+            return redirect(url_for('indice'))
+        else:
+            return 'Usuario o contraseña incorrectos'
+    return render_template('login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('indice'))
+
+
+@app.route('/registro', methods=['GET', 'POST'])
+def registro():
+    if request.method == 'POST':
+        con = conectar_base_datos()
+        cur = con.cursor()
+        username = request.form['username']
+        password = request.form['password']
+        if registrar_usuario(cur, con, username, password):
+            return redirect(url_for('login'))
+        else:
+            abort(404)
+
+    return render_template('registro.html')
 
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
