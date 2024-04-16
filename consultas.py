@@ -487,7 +487,7 @@ def calcular_politicas_desactualizadasOriginal(cur, num): #que es desactualizada
     return paginas_web, politicas
 #pag,politicas=calcular_politicas_desactualizadas(cur)
 
-def calcular_politicas_desactualizadasPrueba(cur, num): #que es desactualizada, menor a que año?
+def calcular_politicas_desactualizadasPrueba(cur, num):
     consulta="""
         SELECT url, SUM(cookies + aviso + proteccionDatos) AS politicas_desactualizadas
         FROM legalData

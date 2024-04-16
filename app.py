@@ -1,6 +1,9 @@
 import sqlite3,requests
+
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
-from flask import Flask, render_template, request,redirect,url_for
+
+from flask import Flask, render_template, request,redirect,url_for,abort
+
 import json
 
 
@@ -22,6 +25,15 @@ class User(UserMixin):
 def conectar_base_datos():
     return sqlite3.connect('example2.db')
 
+@app.errorhandler(400)
+def bad_request_error(error):
+    return render_template('Errores/error.html'), 400
+
+
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('Errores/errorNotFound.html'), 404
+
 @app.route('/')
 def indice():
     return render_template("resultados.html")
@@ -30,19 +42,39 @@ def indice():
 def mostrar_formulario(destino):
     return render_template('formulario.html',destino=destino)
 
-# Ruta para procesar el número ingresado por el usuario
+
 @app.route('/procesar_numero/<destino>', methods=['POST'])
 def procesar_numero(destino):
+    """
     if request.method == 'POST':
-        numero = request.form['numero']  # Obtener el número del formulario
+        numero = request.form['numero']  #nº del form
         if destino == 'critico':
-            # Redireccionar a la página de resultados para usuarios críticos con el número como parámetro
             return redirect(url_for('usuarios', num=numero))
         elif destino == 'politicas':
-            # Redireccionar a la página de resultados para políticas con el número como parámetro
             return redirect(url_for('politicas', num=numero))
+    """
+    if request.method == 'POST':
+        numero = request.form['numero']
+        try:
 
-# Ruta para mostrar los resultados
+            if len(numero)>6:
+                abort(400)
+            numero = int(numero)
+            if numero < 0:
+                render_template("Errores/errorNumerico.html")
+
+
+            if destino == 'critico':
+                return redirect(url_for('usuarios', num=numero))
+            elif destino == 'politicas':
+                return redirect(url_for('politicas', num=numero))
+            else:#Destino no válido
+                abort(404)
+        except ValueError:
+            # Fallo al convertir tipo dato
+            abort(400)
+
+
 @app.route('/usuariosCriticos/<int:num>')
 def usuarios(num):
     con = conectar_base_datos()
