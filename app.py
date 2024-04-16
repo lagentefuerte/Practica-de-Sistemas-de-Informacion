@@ -1,11 +1,15 @@
 import sqlite3,requests
 
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
+from sklearn import tree
 
 from flask import Flask, render_template, request,redirect,url_for,abort
+import pandas as pd
 
 import json
 
+from sklearn import linear_model
+from sklearn.model_selection import train_test_split
 
 from consultas import *
 import json
@@ -98,7 +102,55 @@ def politicas(num):
     return render_template('PoliticasDesactualizadas.html',pag=paginas_web, politicas=politicas)
 
 
+@app.route('/metodos')
+def metodos():
+    # Conectar a la base de datos (debes definir esta función)
+    con = conectar_base_datos()
+    cur = con.cursor()
 
+    # Obtener los datos de los usuarios
+    Datos = obtenerDatosUsuarios(cur)
+    cur.close()
+
+    # Convertir el diccionario en un DataFrame
+    df_usuarios = pd.DataFrame(Datos)
+
+    # Leer los datos desde el archivo CSV
+    df_usuarios.to_csv('usuarios.csv', index=False)
+    train = pd.read_csv('usuarios.csv')
+
+    # Separar las características (X) y la etiqueta (y)
+    X = train[['phishing', 'total', 'contrasenadebil', 'permisos', 'cliclados']]
+    y = train['etiquetas']
+
+    # Dividir los datos en conjuntos de entrenamiento y prueba
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # Inicializar y entrenar el modelo de Regresión Logística
+    modelo = tree.DecisionTreeClassifier()
+
+
+    modelo.fit(X_train, y_train)
+    text_representation = tree.export_text(modelo)
+    print(text_representation)
+    # Predecir para un nuevo usuario
+    nuevoUsuario = {
+        'phishing': [256],
+        'total': [300],
+        'contrasenadebil': [0],
+        'permisos': [0],
+        'cliclados': [100]
+    }
+
+    nuevo_usuario_df = pd.DataFrame(X_test)
+    prediccion = modelo.predict(nuevo_usuario_df)
+
+    if prediccion < 0.5:
+        etiqueta_predicha = "No crítico"
+    else:
+        etiqueta_predicha = "Crítico"
+
+    print("La etiqueta predicha para el nuevo usuario es:", etiqueta_predicha)
 @app.route('/last10vulnerabilities')
 def vulnerabilidades():
     response = requests.get('https://cve.circl.lu/api/last')
