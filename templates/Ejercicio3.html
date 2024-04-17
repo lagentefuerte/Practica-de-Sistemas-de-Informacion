@@ -4,6 +4,13 @@
 <section class="container mt-2">
     <div class="mx-auto mb-3" style="text-align: center; font-weight: bold; font-size: 24px;">Ejercicio 3</div>
      <div class="mx-auto">
+      <div>
+          <strong>Pulsa en el siguiente boton para generar un pdf de la pagina</strong>
+          <form action="/generate_pdf" method="post">
+              <button type="submit">Generar PDF</button>
+          </form>
+      </div>
+
          <!--<h1>Información sacada de la base de datos de CVE-SEARCH PROJECT  </h1>-->
         {% for entrada in datos %}
     <h3>Vulnerabilidad {{ loop.index }}</h3>

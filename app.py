@@ -1,16 +1,13 @@
 import sqlite3,requests
-
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
 from flask import Flask, render_template, request, redirect, url_for, abort
 from sklearn import tree
-
+from xhtml2pdf import pisa
 from flask import Flask, render_template, request,redirect,url_for,abort
 import pandas as pd
 import json
-
 from sklearn import linear_model
 from sklearn.model_selection import train_test_split
-
 from consultas import *
 import json
 
@@ -170,6 +167,7 @@ def ejercicio2():
     else:
             top50percent(cur, "ASC")
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     con = conectar_base_datos()
@@ -205,6 +203,32 @@ def registro():
             abort(404)
 
     return render_template('registro.html')
+
+'''
+@app.route('/generate_pdf', methods=['POST'])
+def generate_pdf():
+    if convert_url_to_pdf(url_to_fetch, pdf_path):
+        return "PDF generado"
+    else:
+        return "Error al generar el PDF"
+'''
+
+def convert_url_to_pdf(url, pdf_path):
+    # Fetch the HTML content from the URL
+    response = requests.get(url)
+    if response.status_code != 200:
+        print(f"Failed to fetch URL: {url}")
+        return False
+
+    html_content = response.text
+
+    # Generate PDF
+    with open(pdf_path, "wb") as pdf_file:
+        pisa_status = pisa.CreatePDF(html_content, dest=pdf_file)
+
+    return not pisa_status.err
+
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
