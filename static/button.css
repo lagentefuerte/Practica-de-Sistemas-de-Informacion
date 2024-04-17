@@ -1,10 +1,10 @@
 .card-button{
     transition-duration: 0.4s;
-    border-color: #ffede7;
+    border-color: #a5dbff;
     color: #346098;
-    background-color: #ffede7
+    background-color: #a5dbff
 }
 .card-button:hover{
     background-color: #346098;
-    color:#ffede7;
+    color: #a5dbff;
 }
