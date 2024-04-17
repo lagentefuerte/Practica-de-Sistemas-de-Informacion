@@ -147,8 +147,7 @@ result = cur.fetchone()
 print("Valor mínimo de emails de phishing de un administrador:", result[0])
 print("Valor máximo de emails de phishing de un administrador:", result[1])
 
-cur.execute(""" ALTER TABLE usuarios DROP COLUMN es_contrasena_debil
-""")
+cur.execute(""" ALTER TABLE usuarios DROP COLUMN es_contrasena_debil""")
 
 cur.execute( """ ALTER TABLE usuarios
 ADD COLUMN es_contrasena_debil INTEGER;

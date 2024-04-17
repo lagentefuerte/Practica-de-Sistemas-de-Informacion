@@ -1,0 +1,31 @@
+username,telefono,passwordHash,provincia,permisos,total,phishing,cliclados,contrasenadebil,etiquetas
+luis.garcia,79209490,6aa2ab5334956e999997539cd9035ae0,Alava,0,136,22,21,0,0
+juan.munoz,79740726,eace8d19d31a304e95c409ab819079a7,Albacete,0,101,22,14,0,1
+jose.suarez,62532290,5f4dcc3b5aa765d61d8327deb882cf99,Alicante,0,406,126,86,1,1
+julio.martinez,72375013,3bf1114a986ba87ed28fc1b5884fc2f8,Almeria,0,440,226,117,1,1
+antonio.lozano,66684993,a3ff7b065d6e0919200ce26642c87b60,Asturias,0,120,87,56,0,1
+juana.diaz,62274087,058755b89fbec19a8f13a48d395cd42f,Avila,0,48,23,4,0,0
+ines.lopez,60855620,276f8db0b86edaa7fc805516c852c889,Badajoz,0,264,93,46,1,1
+josemaria.lozano,74744788,84d961568a65073a3bcf0eb216b2a576,Barcelona,1,391,22,16,1,0
+alicia.vazquez,67187870,0acf4539a14b3aa27deeb4cbdf6e989f,Burgos,1,221,165,17,1,0
+directivo,73756283,37386d73866a7ecfa68464c681d7f366,Caceres,1,428,143,4,0,0
+administrador,None,6522005376b658a8ae437f2553e8fa7a,None,1,493,276,50,0,0
+contacto,None,1660fe5c81c4ce64a2611494c439e1ba,None,1,51,23,13,1,1
+no-reply,None,d16d377af76c99d27093abc22244b342,None,1,235,30,25,1,0
+ceo,None,d073536bba0de057994e2be46bb64a04,None,1,332,291,286,0,1
+contrataciones,None,eb0a191797624dd3a48fa681d3061212,None,1,441,205,92,1,0
+legal,None,607693c5fef9a92c91e914d274b988c6,None,1,283,144,64,0,1
+inteligencia-artificial,None,bf787578e2c6e374529ba85b218322c1,None,1,146,133,19,0,0
+personal,None,e90988574b3f2078b73d98d291db85f8,None,1,20,1,0,0,0
+jesus.duarte,74629930,62e2f762af3518bf3a7b14d4414e3fb7,Guadalajara,0,188,108,91,0,1
+raul.perez,72264613,714ab9fbdad5c5da1b5d34fe1a093b79,Guipuzcoa,0,222,0,0,0,0
+javier.osorio,71020568,5b628ede9539b225d683ce4a9cb797d8,Huelva,0,35,33,31,0,1
+eduardo.galan,79393118,8e7910d5ba9a04d791aba89ab75d3adb,Huesca,0,440,382,9,0,0
+enrique.sanz,None,d8578edf8458ce06fbc5bb76a58c5ca4,Islas Baleares,0,236,8,2,1,0
+info,65066761,cf3bc4839182dafee429b4ae7a415ec9,Jaen,1,181,93,24,0,1
+leo.moran,64598806,55ca44dabad13a109b038fe2f694b7dd,La Coruna,0,134,49,3,0,0
+ivan.fernandez,66691581,4297f44b13955235245b2497399d7a93,La Rioja,0,265,60,46,1,1
+clara.marin,70023853,37b4e2d82900d5e94b8da524fbeb33c0,Cuenca,1,448,372,301,1,1
+virgnia.cruz,78911439,d0763edaa9d9bd2a9516280e9044d885,None,0,361,21,9,1,0
+pruebas,60307361,ff91144bcc200fe870bdf2136ac59930,Lerida,1,154,105,101,0,0
+fran.moreno,None,a152e841783914146e4bcd4f39100686,Lugo,0,216,17,2,1,0

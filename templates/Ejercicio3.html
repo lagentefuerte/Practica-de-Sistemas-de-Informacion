@@ -1,18 +1,16 @@
 {% extends "layout.html" %}
-
+<link href="../static/button.css" rel="stylesheet">
 {% block main %}
 <section class="container mt-2">
     <div class="mx-auto mb-3" style="text-align: center; font-weight: bold; font-size: 24px;">Ejercicio 3</div>
      <div class="mx-auto">
       <div>
-          <strong>Pulsa en el siguiente boton para generar un pdf de la pagina</strong>
-          <form action="/generate_pdf" method="post">
-              <button type="submit">Generar PDF</button>
-          </form>
+          <strong>Pulsa en el siguiente botón para generar un pdf de la pagina:</strong>
+          <button class="btn card-button mr-2" id="generarPdf">Generar PDF</button>
       </div>
 
-         <!--<h1>Información sacada de la base de datos de CVE-SEARCH PROJECT  </h1>-->
-        {% for entrada in datos %}
+      <div id="last10vulnerabilities_html">
+          {% for entrada in datos %}
     <h3>Vulnerabilidad {{ loop.index }}</h3>
     <ul>
         <li><strong>ID:</strong> {{ entrada.id }}</li>
@@ -30,7 +28,20 @@
         <li><strong>Resumen:</strong> {{ entrada.summary }}</li>
     </ul>
          {% endfor %}
+      </div>
     </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+<script>
+    document.getElementById("generarPdf").addEventListener("click", function() {
+        var htmlContent = document.getElementById("last10vulnerabilities_html");
+
+        html2pdf().from(htmlContent).save("last10vulnerabilities.pdf");
+    });
+</script>
+
+
+
 
 </section>
 {% endblock %}

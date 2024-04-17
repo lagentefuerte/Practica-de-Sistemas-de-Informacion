@@ -204,31 +204,6 @@ def registro():
 
     return render_template('registro.html')
 
-'''
-@app.route('/generate_pdf', methods=['POST'])
-def generate_pdf():
-    if convert_url_to_pdf(url_to_fetch, pdf_path):
-        return "PDF generado"
-    else:
-        return "Error al generar el PDF"
-'''
-
-def convert_url_to_pdf(url, pdf_path):
-    # Fetch the HTML content from the URL
-    response = requests.get(url)
-    if response.status_code != 200:
-        print(f"Failed to fetch URL: {url}")
-        return False
-
-    html_content = response.text
-
-    # Generate PDF
-    with open(pdf_path, "wb") as pdf_file:
-        pisa_status = pisa.CreatePDF(html_content, dest=pdf_file)
-
-    return not pisa_status.err
-
-
 
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
