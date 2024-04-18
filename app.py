@@ -22,6 +22,8 @@ def inicializar ():
 app = Flask(__name__)
 app.static_folder = 'static'
 inicializar()
+crearBaseDatos()
+ejercicio3()
 app.secret_key = 'clave_muy_secreta'
 login_manager = LoginManager()
 login_manager.init_app(app)

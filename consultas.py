@@ -12,64 +12,66 @@ def calcularMD5 (cadena):
     md5.update(cadena.encode('utf-8'))
     return md5.hexdigest()
 
-con = sqlite3.connect('example2.db')
-cur = con.cursor()
-f = open("legal_data_online.json", "r")
-datos = json.load(f)
-cur.execute("CREATE TABLE IF NOT EXISTS legalData(""url TEXT PRIMARY KEY,"
-            "cookies INTEGER,"
-            "aviso INTEGER,"
-            "proteccionDatos INTEGER,"
-            "creacion INTEGER"
-            ");")
-con.commit()
-for elem in datos["legal"]:
-    clave = list(elem.keys())[0]
-    print(clave)
-    cur.execute("INSERT OR IGNORE INTO legalData(url, cookies, aviso, proteccionDatos, creacion)"
-                "VALUES ('%s', '%d', '%d', '%d', '%d')" %
-                (clave, elem[clave]['cookies'], elem[clave]['aviso'], elem[clave]['proteccion_de_datos'],
-                 elem[clave]['creacion']))
+
+def crearBaseDatos():
+    con = sqlite3.connect('example2.db')
+    cur = con.cursor()
+    f = open("legal_data_online.json", "r")
+    datos = json.load(f)
+    cur.execute("CREATE TABLE IF NOT EXISTS legalData(""url TEXT PRIMARY KEY,"
+                "cookies INTEGER,"
+                "aviso INTEGER,"
+                "proteccionDatos INTEGER,"
+                "creacion INTEGER"
+                ");")
+    con.commit()
+    for elem in datos["legal"]:
+        clave = list(elem.keys())[0]
+        print(clave)
+        cur.execute("INSERT OR IGNORE INTO legalData(url, cookies, aviso, proteccionDatos, creacion)"
+                    "VALUES ('%s', '%d', '%d', '%d', '%d')" %
+                    (clave, elem[clave]['cookies'], elem[clave]['aviso'], elem[clave]['proteccion_de_datos'],
+                     elem[clave]['creacion']))
+        con.commit()
+
+    f.close()
+    f = open("users_data_online.json", "r")
+    datos_usuarios = json.load(f)
+    cur.execute("CREATE TABLE IF NOT EXISTS usuarios(""username TEXT PRIMARY KEY,"
+                "telefono INTEGER,"
+                "passwordHash TEXT,"
+                "provincia TEXT,"
+                "permisos INTEGER,"
+                "total INTEGER,"
+                "phishing INTEGER,"
+                "cliclados INTEGER"
+                ");")
+    cur.execute("CREATE TABLE IF NOT EXISTS ipfecha (""id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                "username TEXT,"
+                "ip_address TEXT,"
+                "fecha DATE,"
+                "FOREIGN KEY (username) REFERENCES usuarios (username)"
+                ");")
     con.commit()
 
-f.close()
-f = open("users_data_online.json", "r")
-datos_usuarios = json.load(f)
-cur.execute("CREATE TABLE IF NOT EXISTS usuarios(""username TEXT PRIMARY KEY,"
-            "telefono INTEGER,"
-            "passwordHash TEXT,"
-            "provincia TEXT,"
-            "permisos INTEGER,"
-            "total INTEGER,"
-            "phishing INTEGER,"
-            "cliclados INTEGER"
-            ");")
-cur.execute("CREATE TABLE IF NOT EXISTS ipfecha (""id INTEGER PRIMARY KEY AUTOINCREMENT,"
-            "username TEXT,"
-            "ip_address TEXT,"
-            "fecha DATE,"
-            "FOREIGN KEY (username) REFERENCES usuarios (username)"
-            ");")
-con.commit()
+    for elem in datos_usuarios["usuarios"]:
+        clave = list(elem.keys())[0]
+        cur.execute(
+            "INSERT OR IGNORE INTO usuarios(username, telefono, passwordHash, provincia, permisos, total, phishing, cliclados)"
+            "VALUES ('%s', '%s', '%s', '%s', '%s', '%d', '%d', '%d')" %
+            (clave, elem[clave]['telefono'], elem[clave]['contrasena'], elem[clave]['provincia'],
+             elem[clave]['permisos'], elem[clave]["emails"]['total'], elem[clave]["emails"]['phishing'],
+            elem[clave]["emails"]['cliclados']))
+        for i in range(len(elem[clave]["fechas"])):
+            if (elem[clave]["ips"] == "None"):
+                cur.execute("INSERT OR IGNORE INTO ipfecha (username, ip_address, fecha)" "VALUES ('%s', '%s', '%s')" %
+                        (clave, "None", elem[clave]["fechas"][i]))
+            else:
+                cur.execute("INSERT OR IGNORE INTO ipfecha (username, ip_address, fecha)" "VALUES ('%s', '%s', '%s')" %
+                            (clave, elem[clave]["ips"][i], elem[clave]["fechas"][i]))
 
-for elem in datos_usuarios["usuarios"]:
-    clave = list(elem.keys())[0]
-    cur.execute(
-        "INSERT OR IGNORE INTO usuarios(username, telefono, passwordHash, provincia, permisos, total, phishing, cliclados)"
-        "VALUES ('%s', '%s', '%s', '%s', '%s', '%d', '%d', '%d')" %
-        (clave, elem[clave]['telefono'], elem[clave]['contrasena'], elem[clave]['provincia'],
-         elem[clave]['permisos'], elem[clave]["emails"]['total'], elem[clave]["emails"]['phishing'],
-        elem[clave]["emails"]['cliclados']))
-    for i in range(len(elem[clave]["fechas"])):
-        if (elem[clave]["ips"] == "None"):
-            cur.execute("INSERT OR IGNORE INTO ipfecha (username, ip_address, fecha)" "VALUES ('%s', '%s', '%s')" %
-                    (clave, "None", elem[clave]["fechas"][i]))
-        else:
-            cur.execute("INSERT OR IGNORE INTO ipfecha (username, ip_address, fecha)" "VALUES ('%s', '%s', '%s')" %
-                        (clave, elem[clave]["ips"][i], elem[clave]["fechas"][i]))
-
-con.commit()
-f.close()
+    con.commit()
+    f.close()
 
 
 #######################                 EJERCICIO 2
@@ -173,29 +175,39 @@ def min_max_phising_interactuado_admin(cur):
 
 #######################                 EJERCICIO 3
 
-cur.execute(""" ALTER TABLE usuarios DROP COLUMN es_contrasena_debil
-""")
+
 
 # Agrupaciones
-
-cur.execute( """ ALTER TABLE usuarios
-ADD COLUMN es_contrasena_debil INTEGER;
-""")
-cur.execute(""" SELECT passwordHash from usuarios;
-""")
-lista_contrasenas = cur.fetchall()
-for contrasena in lista_contrasenas:
-    bool = False
-    f = open("rockyou-20.txt", 'r')
-    linea = f.readline()
-    while not bool and linea:
-        hashContrasena = calcularMD5(linea[:-1])
-        hashComparar = contrasena[0]
-        bool = hashContrasena == hashComparar
+def ejercicio3():
+    con = sqlite3.connect('example2.db')
+    cur = con.cursor()
+    cur.execute("PRAGMA table_info(usuarios)")
+    columnas = cur.fetchall()
+    existe_columna = False
+    for columna in columnas:
+        if columna[1] == 'es_contrasena_debil':
+            existe_columna = True
+            break
+    if existe_columna:
+        cur.execute("""ALTER TABLE usuarios DROP COLUMN es_contrasena_debil""")
+    cur.execute( """ ALTER TABLE usuarios
+    ADD COLUMN es_contrasena_debil INTEGER;
+    """)
+    cur.execute(""" SELECT passwordHash from usuarios;
+    """)
+    lista_contrasenas = cur.fetchall()
+    for contrasena in lista_contrasenas:
+        bool = False
+        f = open("rockyou-20.txt", 'r')
         linea = f.readline()
-    cur.execute("UPDATE usuarios SET es_contrasena_debil = ? WHERE passwordHash = ?", (int(bool), contrasena[0]))
-con.commit()
-f.close()
+        while not bool and linea:
+            hashContrasena = calcularMD5(linea[:-1])
+            hashComparar = contrasena[0]
+            bool = hashContrasena == hashComparar
+            linea = f.readline()
+        cur.execute("UPDATE usuarios SET es_contrasena_debil = ? WHERE passwordHash = ?", (int(bool), contrasena[0]))
+    con.commit()
+    f.close()
 
 
 #CONSULTAS
