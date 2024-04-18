@@ -1,9 +1,9 @@
 import sqlite3,requests
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
-from flask import Flask, render_template, request, redirect, url_for, abort
+from flask import Flask, render_template, request, redirect, url_for, abort, g
 from sklearn import tree
 from xhtml2pdf import pisa
-from flask import Flask, render_template, request,redirect,url_for,abort
+from flask import Flask, render_template, request,redirect,url_for,abort,session
 import pandas as pd
 import json
 from sklearn import linear_model
@@ -27,6 +27,10 @@ ejercicio3()
 app.secret_key = 'clave_muy_secreta'
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+@app.before_request
+def before_request():
+    g.logged_in = session.get('logged_in', False)
 
 class User(UserMixin):
     def __init__(self, user_id):
@@ -161,6 +165,7 @@ def vulnerabilidades():
 
     return render_template('Ejercicio3.html',datos=last_10_entries)
 
+"""
 @login_required
 @app.route('/top50', methods=['GET']) #peticion get /top50?string=(true/false)
 def ejercicio2():
@@ -168,7 +173,7 @@ def ejercicio2():
         top50percent(cur, "DESC")
     else:
             top50percent(cur, "ASC")
-
+"""
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -180,6 +185,8 @@ def login():
         if consultalogin(cur, username, password):
             user = User(username)
             login_user(user)
+            session['logged_in'] = True
+            g.logged_in = True
             return redirect(url_for('indice'))
         else:
             return 'Usuario o contraseña incorrectos'
@@ -189,6 +196,7 @@ def login():
 @login_required
 def logout():
     logout_user()
+    session.pop('logged_in', None)
     return redirect(url_for('indice'))
 
 
