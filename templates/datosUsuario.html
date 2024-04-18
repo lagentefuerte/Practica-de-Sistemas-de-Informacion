@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block main %}
+<form action="/submit" method="post">
+  <label for="username">Username:</label><br>
+  <input type="text" id="username" name="username"><br>
+  <label for="phone">Phone Number:</label><br>
+  <input type="text" id="phone" name="phone"><br>
+  <label for="passwordHash">Password:</label><br>
+  <input type="text" id="passwordHash" name="password"><br>
+  <label for="permisos">Permisos:</label><br>
+  <select id="permisos" name="permisos">
+    <option value="1">0</option>
+    <option value="2">1</option>
+  </select><br>
+  <label for="total">Total Correos:</label><br>
+  <input type="number" id="total" name="total"><br>
+  <label for="phishing">Correos Phishing Recibidos:</label><br>
+  <input type="number" id="phishing" name="phishing"><br>
+  <label for="clicados">Correos Phishing Clicados:</label><br>
+  <input type="number" id="clicados" name="clicados"><br>
+  <label for="metodoInteligencia">Seleccione un Metodo:</label>
+  <select id="metodoInteligencia" name="metodoInt">
+    <option value="1">Regresión Lineal</option>
+    <option value="2">Árbol de Decisión</option>
+    <option value="3">Bosque Aleatorio</option>
+  </select><br>
+  <input type="submit" value="Submit">
+</form>
+{% endblock %}

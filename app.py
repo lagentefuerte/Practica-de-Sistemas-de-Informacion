@@ -153,6 +153,8 @@ def metodos():
         etiqueta_predicha = "Crítico"
 
     print("La etiqueta predicha para el nuevo usuario es:", etiqueta_predicha)
+
+
 @app.route('/last10vulnerabilities')
 def vulnerabilidades():
     response = requests.get('https://cve.circl.lu/api/last')
@@ -165,8 +167,12 @@ def vulnerabilidades():
 
     return render_template('Ejercicio3.html',datos=last_10_entries)
 
+
 """
 @login_required
+@app.route('/top50', methods=['GET']) #peticion get /top50?string=(true/false)
+
+
 @app.route('/top50', methods=['GET']) #peticion get /top50?string=(true/false)
 def ejercicio2():
     if (request.args.get('string') == "true"):
@@ -213,6 +219,31 @@ def registro():
             abort(404)
 
     return render_template('registro.html')
+
+
+@app.route('/verificarUsuario', methods=['POST'])
+def nuevoUsuario():
+    username = request.form['username']
+    phone = request.form['phone']
+    passwordHash = request.form['password']
+    permisos = request.form['permisos']
+    total = request.form['total']
+    phishing = request.form['phishing']
+    clicados = request.form['clicados']
+    contrasena_debil = esContrasenaDebil(passwordHash)
+    metodoInteligencia=request.form['metodoInt']
+
+    #TODO MEZCLARLO CON EL METODO DE JUANCARLOS
+    return redirect('/') #TODO: devolver la misma página de
+def esContrasenaDebil(passwordHash):
+    bool = False
+    f = open("rockyou-20.txt", 'r')
+    linea = f.readline()
+    while not bool and linea:
+        hashContrasena = calcularMD5(linea[:-1])
+        bool = hashContrasena == passwordHash
+        linea = f.readline()
+    return bool
 
 
 if __name__ == '__main__':
