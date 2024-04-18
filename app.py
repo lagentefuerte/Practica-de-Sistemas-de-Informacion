@@ -220,6 +220,10 @@ def registro():
 
     return render_template('registro.html')
 
+@app.route('/recogidaDatos')
+def mostrat_recogida_datos():
+    return render_template('datosUsuario.html')
+
 
 @app.route('/verificarUsuario', methods=['POST'])
 def nuevoUsuario():
@@ -232,6 +236,11 @@ def nuevoUsuario():
     clicados = request.form['clicados']
     contrasena_debil = esContrasenaDebil(passwordHash)
     metodoInteligencia=request.form['metodoInt']
+    """"
+    1->Regresión Lineal
+    2->Árbol de Decisión
+    3->Bosque Aleatorio
+    """
 
     #TODO MEZCLARLO CON EL METODO DE JUANCARLOS
     return redirect('/') #TODO: devolver la misma página de
