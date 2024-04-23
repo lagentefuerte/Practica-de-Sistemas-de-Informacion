@@ -51,6 +51,14 @@ def not_found_error(error):
 @app.route('/ejercicio1')
 def ejercicio1():
     return render_template('ejercicio1elegirApartado.html')
+@app.route('/ejercicio2')
+def ejercicio2():
+    con = conectar_base_datos()
+    cur = con.cursor()
+    usuariosMayor, puntMayor = calcular_puntuaciones_usuarios_Mayor50(cur)
+    usuariosMenor, puntMenor = calcular_puntuaciones_usuarios_Menor50(cur)
+    con.close()
+    return render_template('usuariosMasMenos50.html',usuariosMayor=usuariosMayor,puntMayor=puntMayor,usuariosMenor=usuariosMenor,puntMenor=puntMenor)
 
 @app.route('/')
 def indice():
@@ -91,10 +99,9 @@ def usuarios(num):
     cur = con.cursor()
 
     usuarios, puntuaciones = calcular_puntuaciones_usuarios_criticosPrueba(cur, num)
-    usuariosMayor,puntMayor = calcular_puntuaciones_usuarios_Mayor50(cur)
-    usuariosMenor,puntMenor = calcular_puntuaciones_usuarios_Menor50(cur)
+
     cur.close()
-    return render_template('UsuariosCriticos.html', usuarios=usuarios, puntuaciones=puntuaciones,usuariosMayor=usuariosMayor,puntMayor=puntMayor,usuariosMenor=usuariosMenor,puntMenor=puntMenor)
+    return render_template('Ej1/UsuariosCriticos.html', usuarios=usuarios, puntuaciones=puntuaciones)
 
 @app.route('/politicasDesactualizadas/<int:num>')
 def politicas(num):
@@ -103,7 +110,7 @@ def politicas(num):
 
     paginas_web, politicas = calcular_politicas_desactualizadasPrueba(cur, num)
     cur.close()
-    return render_template('PoliticasDesactualizadas.html',pag=paginas_web, politicas=politicas)
+    return render_template('Ej1/PoliticasDesactualizadas.html',pag=paginas_web, politicas=politicas)
 
 
 @app.route('/metodos')
