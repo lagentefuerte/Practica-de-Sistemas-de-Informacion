@@ -224,6 +224,45 @@ def registro():
     return render_template('registro.html')
 
 
+@app.route('/recogidaDatos')
+def mostrat_recogida_datos():
+    return render_template('datosUsuario.html')
+
+
+@app.route('/verificarUsuario', methods=['POST'])
+def nuevoUsuario():
+    username = request.form['username']
+    phone = request.form['phone']
+    passwordHash = request.form['password']
+    permisos = request.form['permisos']
+    total = request.form['total']
+    phishing = request.form['phishing']
+    clicados = request.form['clicados']
+    contrasena_debil = esContrasenaDebil(passwordHash)
+    metodoInteligencia=request.form['metodoInt']
+    """"
+    1->Regresión Lineal
+    2->Árbol de Decisión
+    3->Bosque Aleatorio
+    """
+
+    #TODO MEZCLARLO CON EL METODO DE JUANCARLOS
+    #return redirect('/') #TODO: devolver la misma página de
+    return redirect(url_for('metodo', username=username, phone=phone, password=passwordHash, permisos=permisos, total=total, phishing=phishing, clicados=clicados, metodoInteligencia=metodoInteligencia))
+
+
+def esContrasenaDebil(passwordHash):
+    bool = False
+    f = open("rockyou-20.txt", 'r')
+    linea = f.readline()
+    while not bool and linea:
+        hashContrasena = calcularMD5(linea[:-1])
+        bool = hashContrasena == passwordHash
+        linea = f.readline()
+    return bool
+
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
 
