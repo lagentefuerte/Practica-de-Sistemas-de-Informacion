@@ -1,4 +1,4 @@
-import sqlite3,requests
+import sqlite3, requests
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
 from flask import Flask, render_template, request, redirect, url_for, abort
 from sklearn import tree
