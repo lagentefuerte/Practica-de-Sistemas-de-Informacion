@@ -1,16 +1,18 @@
 import sqlite3,requests
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
-from flask import Flask, render_template, request, redirect, url_for, abort, g
+from flask import Flask, render_template, request, redirect, url_for, abort
 from sklearn import tree
+from sklearn.tree import export_graphviz
+import graphviz
 from xhtml2pdf import pisa
-from flask import Flask, render_template, request,redirect,url_for,abort,session
+from flask import Flask, render_template, request,redirect,url_for,abort
 import pandas as pd
 import json
 from sklearn import linear_model
 from sklearn.model_selection import train_test_split
 from consultas import *
 import json
-
+import os
 def conectar_base_datos():
     return sqlite3.connect('example2.db')
 
@@ -27,10 +29,6 @@ ejercicio3()
 app.secret_key = 'clave_muy_secreta'
 login_manager = LoginManager()
 login_manager.init_app(app)
-
-@app.before_request
-def before_request():
-    g.logged_in = session.get('logged_in', False)
 
 class User(UserMixin):
     def __init__(self, user_id):
@@ -105,11 +103,12 @@ def politicas(num):
 
 
 @app.route('/metodos')
-def metodos():
+def metodoss():
     # Conectar a la base de datos (debes definir esta función)
     con = conectar_base_datos()
     cur = con.cursor()
-
+    # Agregar la ruta al directorio binario de Graphviz al entorno
+    os.environ["PATH"] += os.pathsep + 'C:/Program Files/Graphviz/bin/'
     # Obtener los datos de los usuarios
     Datos = obtenerDatosUsuarios(cur)
     cur.close()
@@ -131,7 +130,6 @@ def metodos():
     # Inicializar y entrenar el modelo de Regresión Logística
     modelo = tree.DecisionTreeClassifier()
 
-
     modelo.fit(X_train, y_train)
     text_representation = tree.export_text(modelo)
     print(text_representation)
@@ -144,7 +142,7 @@ def metodos():
         'cliclados': [100]
     }
 
-    nuevo_usuario_df = pd.DataFrame(X_test)
+    nuevo_usuario_df = pd.DataFrame(nuevoUsuario)
     prediccion = modelo.predict(nuevo_usuario_df)
 
     if prediccion < 0.5:
@@ -154,6 +152,19 @@ def metodos():
 
     print("La etiqueta predicha para el nuevo usuario es:", etiqueta_predicha)
 
+
+
+    # Exportar el árbol de decisiones a un archivo .dot
+    dot_data = export_graphviz(modelo, out_file=None,
+                               feature_names=X.columns.tolist(),
+                               class_names=['0', '1'],
+                               filled=True, rounded=True,
+                               special_characters=True)
+    graph = graphviz.Source(dot_data)
+    graph.render('test', format='png')
+
+    # Renderiza la plantilla 'metoditos.html' y pasa la ruta de la imagen
+    return render_template('metoditos.html', image_path='test.png')
 
 @app.route('/last10vulnerabilities')
 def vulnerabilidades():
@@ -167,19 +178,14 @@ def vulnerabilidades():
 
     return render_template('Ejercicio3.html',datos=last_10_entries)
 
-
-"""
 @login_required
-@app.route('/top50', methods=['GET']) #peticion get /top50?string=(true/false)
-
-
 @app.route('/top50', methods=['GET']) #peticion get /top50?string=(true/false)
 def ejercicio2():
     if (request.args.get('string') == "true"):
         top50percent(cur, "DESC")
     else:
             top50percent(cur, "ASC")
-"""
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -191,8 +197,6 @@ def login():
         if consultalogin(cur, username, password):
             user = User(username)
             login_user(user)
-            session['logged_in'] = True
-            g.logged_in = True
             return redirect(url_for('indice'))
         else:
             return 'Usuario o contraseña incorrectos'
@@ -202,7 +206,6 @@ def login():
 @login_required
 def logout():
     logout_user()
-    session.pop('logged_in', None)
     return redirect(url_for('indice'))
 
 
@@ -219,40 +222,6 @@ def registro():
             abort(404)
 
     return render_template('registro.html')
-
-@app.route('/recogidaDatos')
-def mostrat_recogida_datos():
-    return render_template('datosUsuario.html')
-
-
-@app.route('/verificarUsuario', methods=['POST'])
-def nuevoUsuario():
-    username = request.form['username']
-    phone = request.form['phone']
-    passwordHash = request.form['password']
-    permisos = request.form['permisos']
-    total = request.form['total']
-    phishing = request.form['phishing']
-    clicados = request.form['clicados']
-    contrasena_debil = esContrasenaDebil(passwordHash)
-    metodoInteligencia=request.form['metodoInt']
-    """"
-    1->Regresión Lineal
-    2->Árbol de Decisión
-    3->Bosque Aleatorio
-    """
-
-    #TODO MEZCLARLO CON EL METODO DE JUANCARLOS
-    return redirect('/') #TODO: devolver la misma página de
-def esContrasenaDebil(passwordHash):
-    bool = False
-    f = open("rockyou-20.txt", 'r')
-    linea = f.readline()
-    while not bool and linea:
-        hashContrasena = calcularMD5(linea[:-1])
-        bool = hashContrasena == passwordHash
-        linea = f.readline()
-    return bool
 
 
 if __name__ == '__main__':

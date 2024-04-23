@@ -437,6 +437,65 @@ def calcular_puntuaciones_usuarios_criticosOriginal(cur, num): #la puntuación h
     #print(puntuaciones)
     return usuarios, puntuaciones
 
+
+def obtenerDatosUsuarios(cur):
+    consulta_sql = """
+        SELECT
+            username,
+            telefono,
+            passwordHash,
+            provincia,
+            permisos,
+            total,
+            phishing,
+            cliclados,
+            es_contrasena_debil
+        FROM
+            usuarios
+    """
+    cur.execute(consulta_sql)
+    resultados = cur.fetchall()
+
+    Datos = {
+        'username': [],
+        'telefono': [],
+        'passwordHash': [],
+        'provincia': [],
+        'permisos': [],
+        'total': [],
+        'phishing': [],
+        'cliclados': [],
+        'contrasenadebil': [],
+        'etiquetas':[]
+    }
+
+    # Iterar sobre los resultados y agregarlos al diccionario
+    for fila in resultados:
+        Datos['username'].append(fila[0])
+        Datos['telefono'].append(fila[1])
+        Datos['passwordHash'].append(fila[2])
+        Datos['provincia'].append(fila[3])
+        Datos['permisos'].append(fila[4])
+        Datos['total'].append(fila[5])
+        Datos['phishing'].append(fila[6])
+        Datos['cliclados'].append(fila[7])
+        Datos['contrasenadebil'].append(fila[8])
+
+    # Cargar el archivo JSON
+    with open('users_data_online_clasificado.json', 'r') as f:
+        data = json.load(f)
+
+    # Recorrer el JSON
+    for usuario in data['usuarios']:
+        if usuario['critico'] == 1:
+            Datos['etiquetas'].append(1)
+        else:
+            Datos['etiquetas'].append(0)
+
+        # Aquí puedes acceder a otros datos del usuario según sea necesario
+
+
+    return Datos
 def calcular_puntuaciones_usuarios_criticosPrueba(cur, num): #la puntuación hay que multiplicar por 100 el nº de fishing para que no de 0, algo; da directamente la probabilidad
     consulta_sql = """
             SELECT username, (phishing*100 / total) AS puntuacion
