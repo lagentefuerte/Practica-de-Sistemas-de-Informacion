@@ -520,8 +520,7 @@ def obtenerDatosUsuarios(cur):
     return Datos
 
 
-def calcular_puntuaciones_usuarios_criticosPrueba(cur,
-                                                  num):  # la puntuación hay que multiplicar por 100 el nº de fishing para que no de 0, algo; da directamente la probabilidad
+def calcular_puntuaciones_usuarios_criticosPrueba(cur,num):  # la puntuación hay que multiplicar por 100 el nº de fishing para que no de 0, algo; da directamente la probabilidad
     consulta_sql = """
             SELECT username, (phishing*100 / total) AS puntuacion
             FROM usuarios WHERE critico == 1
@@ -539,7 +538,7 @@ def calcular_puntuaciones_usuarios_criticosPrueba(cur,
     return usuarios, puntuaciones
 
 
-def calcular_puntuaciones_usuarios_Mayor50(cur):
+def calcular_puntuaciones_usuarios_Mayor50(cur,num):
     consulta_sql = """
             SELECT username, (phishing * 100 / total) AS puntuacion
             FROM usuarios WHERE (((cliclados * 100 / phishing)) > 50) AND critico == 1
@@ -552,7 +551,7 @@ def calcular_puntuaciones_usuarios_Mayor50(cur):
     return usuarios, puntuaciones
 
 
-def calcular_puntuaciones_usuarios_Menor50(cur):
+def calcular_puntuaciones_usuarios_Menor50(cur,num):
     consulta_sql = """
             SELECT username, (phishing * 100 / total) AS puntuacion
             FROM usuarios WHERE (((cliclados * 100 / phishing)) < 50) AND critico == 1

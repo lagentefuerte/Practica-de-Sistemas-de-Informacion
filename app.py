@@ -51,14 +51,22 @@ def not_found_error(error):
 @app.route('/ejercicio1')
 def ejercicio1():
     return render_template('ejercicio1elegirApartado.html')
-@app.route('/ejercicio2')
+@app.route('/form2')
+def form2():
+    return render_template('formularioMayorMenor.html')
+
+@app.route('/ejercicio2/<int:num><int:num2>',methods=['GET'])
 def ejercicio2():
     con = conectar_base_datos()
     cur = con.cursor()
-    usuariosMayor, puntMayor = calcular_puntuaciones_usuarios_Mayor50(cur)
-    usuariosMenor, puntMenor = calcular_puntuaciones_usuarios_Menor50(cur)
+    num=request.form['numero']
+    mayorMenor=request.form['cincuenta']
+    if mayorMenor==1:
+        usuarios, punt = calcular_puntuaciones_usuarios_Mayor50(cur, num)
+    elif mayorMenor==2:
+        usuarios, punt = calcular_puntuaciones_usuarios_Menor50(cur, num)
     con.close()
-    return render_template('usuariosMasMenos50.html',usuariosMayor=usuariosMayor,puntMayor=puntMayor,usuariosMenor=usuariosMenor,puntMenor=puntMenor)
+    return render_template('usuariosMasMenos50.html',usuariosMayor=usuarios,puntMayor=punt)
 
 @app.route('/')
 def indice():
@@ -80,7 +88,6 @@ def procesar_numero(destino):
             numero = int(numero)
             if numero < 0:
                 render_template("Errores/errorNumerico.html")
-
 
             if destino == 'critico':
                 return redirect(url_for('usuarios', num=numero))
