@@ -30,14 +30,14 @@ app.secret_key = 'clave_muy_secreta'
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-class User(UserMixin):
-    def __init__(self, user_id):
-        self.id = user_id
 
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User(user_id)
+"""
+RUTAS BÁSICAS
+"""
+@app.route('/')
+def indice():
+    return render_template("resultados.html")
 
 @app.errorhandler(400)
 def bad_request_error(error):
@@ -48,34 +48,17 @@ def bad_request_error(error):
 def not_found_error(error):
     return render_template('Errores/errorNotFound.html'), 404
 
+
+"""
+EJERCICIO 1: Formulario, tratamiento de datos y visualización
+"""
 @app.route('/ejercicio1')
 def ejercicio1():
     return render_template('ejercicio1elegirApartado.html')
-@app.route('/form2')
-def form2():
-    return render_template('formularioMayorMenor.html')
-
-@app.route('/ejercicio2/<int:num><int:num2>',methods=['GET'])
-def ejercicio2():
-    con = conectar_base_datos()
-    cur = con.cursor()
-    num=request.form['numero']
-    mayorMenor=request.form['cincuenta']
-    if mayorMenor==1:
-        usuarios, punt = calcular_puntuaciones_usuarios_Mayor50(cur, num)
-    elif mayorMenor==2:
-        usuarios, punt = calcular_puntuaciones_usuarios_Menor50(cur, num)
-    con.close()
-    return render_template('usuariosMasMenos50.html',usuariosMayor=usuarios,puntMayor=punt)
-
-@app.route('/')
-def indice():
-    return render_template("resultados.html")
 
 @app.route('/formulario/<destino>')
 def mostrar_formulario(destino):
     return render_template('formulario.html',destino=destino)
-
 
 @app.route('/procesar_numero/<destino>', methods=['POST'])
 def procesar_numero(destino):
@@ -119,6 +102,105 @@ def politicas(num):
     cur.close()
     return render_template('Ej1/PoliticasDesactualizadas.html',pag=paginas_web, politicas=politicas)
 
+"""
+EJERCICIO 2: Gráficos usuarios con mayor o menor; formualrio y tratamiento de datos
+"""
+@app.route('/form2')
+def form2():
+    return render_template('formularioMayorMenor.html')
+
+@app.route('/procesarMayorMenor', methods=['POST'])
+def procesarMayorMenor():
+    if request.method == 'POST':
+        try:
+            num = int(request.form['numero'])
+            mayorMenor = int(request.form['cincuenta'])
+            return redirect(url_for('ejercicio2', num=num, num2=mayorMenor))
+        except (ValueError, KeyError):
+            abort(400)
+    else:
+        abort(404)
+@app.route('/ejercicio2/<int:num>/<int:num2>')
+def ejercicio2(num,num2):
+    con = conectar_base_datos()
+    cur = con.cursor()
+    if num2==1:
+        usuarios, punt = calcular_puntuaciones_usuarios_Mayor50(cur, num)
+    elif num2==2:
+        usuarios, punt = calcular_puntuaciones_usuarios_Menor50(cur, num)
+    else:
+        abort(404)
+    con.close()
+    return render_template('usuariosMasMenos50.html',usuarios=usuarios,punt=punt)
+
+"""
+EJERCICIO 3: Últimas 10 vulnerabilidades
+"""
+
+@app.route('/last10vulnerabilities')
+def vulnerabilidades():
+    response = requests.get('https://cve.circl.lu/api/last')
+    data = response.json()
+    last_10_entries = data[:10]
+
+    #PARA VER EL FORMATO DEL JSON QUE SE OBTIENE
+    #with open('last_10_vulnerabilities.json', 'w') as json_file:
+     #   json.dump(last_10_entries, json_file)
+
+    return render_template('Ejercicio3.html',datos=last_10_entries)
+
+
+"""
+EJERCICIO 4: Login (pdf dentro de ejercicio 3)
+"""
+class User(UserMixin):
+    def __init__(self, user_id):
+        self.id = user_id
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User(user_id)
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    con = conectar_base_datos()
+    cur = con.cursor()
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if consultalogin(cur, username, password):
+            user = User(username)
+            login_user(user)
+            return redirect(url_for('indice'))
+        else:
+            return 'Usuario o contraseña incorrectos'
+    return render_template('login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('indice'))
+
+
+@app.route('/registro', methods=['GET', 'POST'])
+def registro():
+    if request.method == 'POST':
+        con = conectar_base_datos()
+        cur = con.cursor()
+        username = request.form['username']
+        password = request.form['password']
+        if registrar_usuario(cur, con, username, password):
+            return redirect(url_for('login'))
+        else:
+            abort(404)
+
+    return render_template('registro.html')
+
+
+"""
+EJERCICIO 5: Algorigtmo IA
+"""
 
 @app.route('/metodos')
 def metodoss():
@@ -184,55 +266,11 @@ def metodoss():
     # Renderiza la plantilla 'metoditos.html' y pasa la ruta de la imagen
     return render_template('metoditos.html', image_path='test.png')
 
-@app.route('/last10vulnerabilities')
-def vulnerabilidades():
-    response = requests.get('https://cve.circl.lu/api/last')
-    data = response.json()
-    last_10_entries = data[:10]
-
-    #PARA VER EL FORMATO DEL JSON QUE SE OBTIENE
-    #with open('last_10_vulnerabilities.json', 'w') as json_file:
-     #   json.dump(last_10_entries, json_file)
-
-    return render_template('Ejercicio3.html',datos=last_10_entries)
 
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    con = conectar_base_datos()
-    cur = con.cursor()
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        if consultalogin(cur, username, password):
-            user = User(username)
-            login_user(user)
-            return redirect(url_for('indice'))
-        else:
-            return 'Usuario o contraseña incorrectos'
-    return render_template('login.html')
-
-@app.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for('indice'))
-
-
-@app.route('/registro', methods=['GET', 'POST'])
-def registro():
-    if request.method == 'POST':
-        con = conectar_base_datos()
-        cur = con.cursor()
-        username = request.form['username']
-        password = request.form['password']
-        if registrar_usuario(cur, con, username, password):
-            return redirect(url_for('login'))
-        else:
-            abort(404)
-
-    return render_template('registro.html')
-
+"""
+EJERCICIO 5.2: Datos para decicisión sobre usuario
+"""
 
 @app.route('/recogidaDatos')
 def mostrat_recogida_datos():
@@ -270,6 +308,8 @@ def esContrasenaDebil(passwordHash):
         bool = hashContrasena == passwordHash
         linea = f.readline()
     return bool
+
+
 
 
 

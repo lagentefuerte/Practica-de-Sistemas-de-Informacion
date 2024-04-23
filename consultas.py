@@ -543,8 +543,9 @@ def calcular_puntuaciones_usuarios_Mayor50(cur,num):
             SELECT username, (phishing * 100 / total) AS puntuacion
             FROM usuarios WHERE (((cliclados * 100 / phishing)) > 50) AND critico == 1
             ORDER BY puntuacion DESC
+            LIMIT ?
         """
-    cur.execute(consulta_sql)
+    cur.execute(consulta_sql, (num,))
     resultados = cur.fetchall()
     usuarios = [row[0] for row in resultados]
     puntuaciones = [row[1] for row in resultados]
@@ -556,8 +557,9 @@ def calcular_puntuaciones_usuarios_Menor50(cur,num):
             SELECT username, (phishing * 100 / total) AS puntuacion
             FROM usuarios WHERE (((cliclados * 100 / phishing)) < 50) AND critico == 1
             ORDER BY puntuacion DESC
+            LIMIT ?
         """
-    cur.execute(consulta_sql)
+    cur.execute(consulta_sql, (num,))
     resultados = cur.fetchall()
     usuarios = [row[0] for row in resultados]
     puntuaciones = [row[1] for row in resultados]
