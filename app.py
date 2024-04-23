@@ -48,6 +48,10 @@ def bad_request_error(error):
 def not_found_error(error):
     return render_template('Errores/errorNotFound.html'), 404
 
+@app.route('/ejercicio1')
+def ejercicio1():
+    return render_template('ejercicio1elegirApartado.html')
+
 @app.route('/')
 def indice():
     return render_template("resultados.html")
@@ -177,14 +181,6 @@ def vulnerabilidades():
      #   json.dump(last_10_entries, json_file)
 
     return render_template('Ejercicio3.html',datos=last_10_entries)
-
-@login_required
-@app.route('/top50', methods=['GET']) #peticion get /top50?string=(true/false)
-def ejercicio2():
-    if (request.args.get('string') == "true"):
-        top50percent(cur, "DESC")
-    else:
-            top50percent(cur, "ASC")
 
 
 @app.route('/login', methods=['GET', 'POST'])
