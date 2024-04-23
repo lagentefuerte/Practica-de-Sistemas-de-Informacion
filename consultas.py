@@ -4,10 +4,10 @@ import statistics
 import hashlib
 from datetime import datetime
 
-
 import matplotlib.pyplot as plt
 
-def calcularMD5 (cadena):
+
+def calcularMD5(cadena):
     md5 = hashlib.md5()
     md5.update(cadena.encode('utf-8'))
     return md5.hexdigest()
@@ -35,7 +35,7 @@ def crearBaseDatos():
         con.commit()
 
     f.close()
-    f = open("users_data_online.json", "r")
+    f = open("users_data_online_clasificado.json", "r")
     datos_usuarios = json.load(f)
     cur.execute("CREATE TABLE IF NOT EXISTS usuarios(""username TEXT PRIMARY KEY,"
                 "telefono INTEGER,"
@@ -44,7 +44,8 @@ def crearBaseDatos():
                 "permisos INTEGER,"
                 "total INTEGER,"
                 "phishing INTEGER,"
-                "cliclados INTEGER"
+                "cliclados INTEGER,"
+                "critico INTEGER"
                 ");")
     cur.execute("CREATE TABLE IF NOT EXISTS ipfecha (""id INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "username TEXT,"
@@ -57,15 +58,16 @@ def crearBaseDatos():
     for elem in datos_usuarios["usuarios"]:
         clave = list(elem.keys())[0]
         cur.execute(
-            "INSERT OR IGNORE INTO usuarios(username, telefono, passwordHash, provincia, permisos, total, phishing, cliclados)"
-            "VALUES ('%s', '%s', '%s', '%s', '%s', '%d', '%d', '%d')" %
+            "INSERT OR IGNORE INTO usuarios(username, telefono, passwordHash, provincia, permisos, total, phishing, cliclados, critico)"
+            "VALUES ('%s', '%s', '%s', '%s', '%s', '%d', '%d', '%d', '%d')" %
             (clave, elem[clave]['telefono'], elem[clave]['contrasena'], elem[clave]['provincia'],
              elem[clave]['permisos'], elem[clave]["emails"]['total'], elem[clave]["emails"]['phishing'],
-            elem[clave]["emails"]['cliclados']))
+             elem[clave]["emails"]['cliclados'], elem[clave]['critico']))
+
         for i in range(len(elem[clave]["fechas"])):
-            if (elem[clave]["ips"] == "None"):
+            if elem[clave]["ips"] == "None":
                 cur.execute("INSERT OR IGNORE INTO ipfecha (username, ip_address, fecha)" "VALUES ('%s', '%s', '%s')" %
-                        (clave, "None", elem[clave]["fechas"][i]))
+                            (clave, "None", elem[clave]["fechas"][i]))
             else:
                 cur.execute("INSERT OR IGNORE INTO ipfecha (username, ip_address, fecha)" "VALUES ('%s', '%s', '%s')" %
                             (clave, elem[clave]["ips"][i], elem[clave]["fechas"][i]))
@@ -78,10 +80,12 @@ def crearBaseDatos():
 
 def num_muestras(cur):
     cur.execute("SELECT COUNT(*) from usuarios")
-    numUs= cur.fetchall()[0][0]
-    #print("Numero de usuarios:",numUs)
+    numUs = cur.fetchall()[0][0]
+    # print("Numero de usuarios:",numUs)
     return numUs
-#num_muestras(cur)
+
+
+# num_muestras(cur)
 
 # Obtener el número de fechas distintas por usuario en las que se ha cambiado la contraseña
 def media_desviacion_fechas_cambio_contrasena(cur):
@@ -97,10 +101,12 @@ def media_desviacion_fechas_cambio_contrasena(cur):
     media_fechas_cambio_contraseña = statistics.mean(num_fechas_cambio_contraseña_por_usuario)
     desviacion_estandar_fechas_cambio_contraseña = statistics.stdev(num_fechas_cambio_contraseña_por_usuario)
 
-    #print("Media de fechas de cambio de contraseña por usuario:", media_fechas_cambio_contraseña)
-    #print("Desviación estándar de fechas de cambio de contraseña por usuario:",desviacion_estandar_fechas_cambio_contraseña)
-    return round(media_fechas_cambio_contraseña,3),round(desviacion_estandar_fechas_cambio_contraseña,3)
-#media_desviacion_fechas_cambio_contrasena(cur)
+    # print("Media de fechas de cambio de contraseña por usuario:", media_fechas_cambio_contraseña)
+    # print("Desviación estándar de fechas de cambio de contraseña por usuario:",desviacion_estandar_fechas_cambio_contraseña)
+    return round(media_fechas_cambio_contraseña, 3), round(desviacion_estandar_fechas_cambio_contraseña, 3)
+
+
+# media_desviacion_fechas_cambio_contrasena(cur)
 
 def media_desv_ips_detectadas(cur):
     cur.execute("""
@@ -118,10 +124,12 @@ def media_desv_ips_detectadas(cur):
     media_ips_cambio_contraseña = statistics.mean(num_ips_cambio_contraseña_por_usuario)
     desviacion_estandar_ips_cambio_contraseña = statistics.stdev(num_ips_cambio_contraseña_por_usuario)
 
-    #print("Media de IPs de cambio de contraseña por usuario:", media_ips_cambio_contraseña)
-    #print("Desviación estándar de IPs de cambio de contraseña por usuario:", desviacion_estandar_ips_cambio_contraseña)
-    return round(media_ips_cambio_contraseña,3),round(desviacion_estandar_ips_cambio_contraseña,3)
-#media_desv_ips_detectadas(cur)
+    # print("Media de IPs de cambio de contraseña por usuario:", media_ips_cambio_contraseña)
+    # print("Desviación estándar de IPs de cambio de contraseña por usuario:", desviacion_estandar_ips_cambio_contraseña)
+    return round(media_ips_cambio_contraseña, 3), round(desviacion_estandar_ips_cambio_contraseña, 3)
+
+
+# media_desv_ips_detectadas(cur)
 
 def media_desv_phising(cur):
     # Obtener el número de emails de phishing para cada usuario
@@ -133,10 +141,12 @@ def media_desv_phising(cur):
 
     media_emails_phishing = statistics.mean(num_emails_phishing_por_usuario)
     desviacion_estandar_emails_phishing = statistics.stdev(num_emails_phishing_por_usuario)
-    #print("Media de emails de phishing por usuario:", media_emails_phishing)
-    #print("Desviación estándar de emails de phishing por usuario:", desviacion_estandar_emails_phishing)
-    return round(media_emails_phishing,3),round(desviacion_estandar_emails_phishing,3)
-#media_desv_phising(cur)
+    # print("Media de emails de phishing por usuario:", media_emails_phishing)
+    # print("Desviación estándar de emails de phishing por usuario:", desviacion_estandar_emails_phishing)
+    return round(media_emails_phishing, 3), round(desviacion_estandar_emails_phishing, 3)
+
+
+# media_desv_phising(cur)
 
 def min_max_emails_recibidos(cur):
     cur.execute("""
@@ -148,10 +158,12 @@ def min_max_emails_recibidos(cur):
         ) AS total_emails_por_usuario;
     """)
     result = cur.fetchone()
-    #print("Valor mínimo de emails recibidos:", result[0])
-    #print("Valor máximo de emails recibidos:", result[1])
-    return result[0],result[1]
-#min_max_emails_recibidos(cur)
+    # print("Valor mínimo de emails recibidos:", result[0])
+    # print("Valor máximo de emails recibidos:", result[1])
+    return result[0], result[1]
+
+
+# min_max_emails_recibidos(cur)
 
 def min_max_phising_interactuado_admin(cur):
     # Valor mínimo y valor máximo del número de emails de phishing en los que ha interactuado un administrador
@@ -166,15 +178,15 @@ def min_max_phising_interactuado_admin(cur):
         ) AS emails_phishing_admin;
     """)
     result = cur.fetchone()
-    #print("Valor mínimo de emails de phishing de un administrador:", result[0])
-    #print("Valor máximo de emails de phishing de un administrador:", result[1])
-    return result[0],result[1]
-#min_max_phising_interactuado_admin(cur)
+    # print("Valor mínimo de emails de phishing de un administrador:", result[0])
+    # print("Valor máximo de emails de phishing de un administrador:", result[1])
+    return result[0], result[1]
 
+
+# min_max_phising_interactuado_admin(cur)
 
 
 #######################                 EJERCICIO 3
-
 
 
 # Agrupaciones
@@ -190,7 +202,7 @@ def ejercicio3():
             break
     if existe_columna:
         cur.execute("""ALTER TABLE usuarios DROP COLUMN es_contrasena_debil""")
-    cur.execute( """ ALTER TABLE usuarios
+    cur.execute(""" ALTER TABLE usuarios
     ADD COLUMN es_contrasena_debil INTEGER;
     """)
     cur.execute(""" SELECT passwordHash from usuarios;
@@ -210,7 +222,7 @@ def ejercicio3():
     f.close()
 
 
-#CONSULTAS
+# CONSULTAS
 def num_observaciones_usuarios(cur):
     cur.execute("""
         SELECT Count(*)
@@ -218,10 +230,11 @@ def num_observaciones_usuarios(cur):
         WHERE permisos = 0 and phishing = 0
     """)
     phishing_usuario = cur.fetchone()[0]
-    #print(phishing_usuario)
+    # print(phishing_usuario)
     return phishing_usuario
-#num_observaciones_usuarios(cur)
 
+
+# num_observaciones_usuarios(cur)
 
 
 def num_observaciones_admin(cur):
@@ -233,6 +246,7 @@ def num_observaciones_admin(cur):
     phishing_admin = cur.fetchone()[0]
     return phishing_admin
 
+
 def num_observaciones_pass_debil(cur):
     cur.execute("""
         SELECT Count(*)
@@ -242,6 +256,7 @@ def num_observaciones_pass_debil(cur):
     phishing_weakPWD = cur.fetchone()[0]
     return phishing_weakPWD
 
+
 def num_observaciones_pass_fuerte(cur):
     cur.execute("""
         SELECT Count(*)
@@ -250,6 +265,7 @@ def num_observaciones_pass_fuerte(cur):
     """)
     phishing_strongPWD = cur.fetchone()[0]
     return phishing_strongPWD
+
 
 def sum_media_max_min_phishing_usuario(cur):
     cur.execute("""
@@ -262,9 +278,11 @@ def sum_media_max_min_phishing_usuario(cur):
     emails_avg = result[1]
     emails_max = result[2]
     emails_min = result[3]
-    #print(emails_sum,emails_avg,emails_max,emails_min)
-    return emails_sum,emails_avg,emails_max,emails_min
-#sum_media_max_min_phishing_usuario(cur)
+    # print(emails_sum,emails_avg,emails_max,emails_min)
+    return emails_sum, emails_avg, emails_max, emails_min
+
+
+# sum_media_max_min_phishing_usuario(cur)
 
 def sum_media_max_min_phishing_admin(cur):
     cur.execute("""
@@ -277,7 +295,8 @@ def sum_media_max_min_phishing_admin(cur):
     emails_avg = result[1]
     emails_max = result[2]
     emails_min = result[3]
-    return emails_sum,emails_avg,emails_max,emails_min
+    return emails_sum, emails_avg, emails_max, emails_min
+
 
 def sum_media_max_min_phising_pass_fuerte(cur):
     cur.execute("""
@@ -290,7 +309,8 @@ def sum_media_max_min_phising_pass_fuerte(cur):
     emails_avg = result[1]
     emails_max = result[2]
     emails_min = result[3]
-    return emails_sum,emails_avg,emails_max,emails_min
+    return emails_sum, emails_avg, emails_max, emails_min
+
 
 def sum_media_max_min_phising_pass_debil(cur):
     cur.execute("""
@@ -305,6 +325,7 @@ def sum_media_max_min_phising_pass_debil(cur):
     emails_min = result[3]
     return emails_sum, emails_avg, emails_max, emails_min
 
+
 def mediana_varianza_phishing_usuarios(cur):
     cur.execute("""
         SELECT phishing
@@ -316,9 +337,11 @@ def mediana_varianza_phishing_usuarios(cur):
     emails = [row[0] for row in result]
     emails_median = statistics.median(emails)
     emails_variance = statistics.variance(emails)
-    #print(emails_median,emails_variance)
-    return emails_median,emails_variance
-#mediana_varianza_phishing_usuarios(cur)
+    # print(emails_median,emails_variance)
+    return emails_median, emails_variance
+
+
+# mediana_varianza_phishing_usuarios(cur)
 def mediana_varianza_phishing_admin(cur):
     cur.execute("""
         SELECT phishing
@@ -330,7 +353,8 @@ def mediana_varianza_phishing_admin(cur):
     emails = [row[0] for row in result]
     emails_median = statistics.median(emails)
     emails_variance = statistics.variance(emails)
-    return emails_median,emails_variance
+    return emails_median, emails_variance
+
 
 def mediana_varianza_phishing_pass_fuerte(cur):
     cur.execute("""
@@ -343,7 +367,8 @@ def mediana_varianza_phishing_pass_fuerte(cur):
     emails = [row[0] for row in result]
     emails_median = statistics.median(emails)
     emails_variance = statistics.variance(emails)
-    return emails_median,emails_variance
+    return emails_median, emails_variance
+
 
 def mediana_varianza_phising_pass_debil(cur):
     cur.execute("""
@@ -356,11 +381,7 @@ def mediana_varianza_phising_pass_debil(cur):
     emails = [row[0] for row in result]
     emails_median = statistics.median(emails)
     emails_variance = statistics.variance(emails)
-    return emails_median,emails_variance
-
-
-
-
+    return emails_median, emails_variance
 
 
 #######################                 EJERCICIO 4
@@ -414,15 +435,17 @@ def calcular_media_tiempo_cambio_contrasena_por_usuario(cur):
         media_tiempo = sum(tiempos) / len(tiempos)
         medias_por_permiso[permiso] = media_tiempo
 
-    medias=[]
+    medias = []
     for permiso, media in medias_por_permiso.items():
-        #print(f"Media de tiempo de cambio de contraseña para permiso {permiso}: {media:.2f} días")
-        medias.append(round(media,2))
-    return medias[0],medias[1]
+        # print(f"Media de tiempo de cambio de contraseña para permiso {permiso}: {media:.2f} días")
+        medias.append(round(media, 2))
+    return medias[0], medias[1]
 
-#calcular_media_tiempo_cambio_contrasena_por_usuario(cur)
 
-def calcular_puntuaciones_usuarios_criticosOriginal(cur, num): #la puntuación hay que multiplicar por 100 el nº de fishing para que no de 0, algo; da directamente la probabilidad
+# calcular_media_tiempo_cambio_contrasena_por_usuario(cur)
+
+def calcular_puntuaciones_usuarios_criticosOriginal(cur,
+                                                    num):  # la puntuación hay que multiplicar por 100 el nº de fishing para que no de 0, algo; da directamente la probabilidad
     cur.execute("""SELECT username, (phishing*100 / total) AS puntuacion
         FROM usuarios WHERE es_contrasena_debil==1
         ORDER BY puntuacion DESC
@@ -431,10 +454,10 @@ def calcular_puntuaciones_usuarios_criticosOriginal(cur, num): #la puntuación h
     resultados = cur.fetchall()
     usuarios = [row[0] for row in resultados]
     puntuaciones = [row[1] for row in resultados]
-    #print("usuarios",end="")
-    #print(usuarios)
-    #print("puntuaciones",end="")
-    #print(puntuaciones)
+    # print("usuarios",end="")
+    # print(usuarios)
+    # print("puntuaciones",end="")
+    # print(puntuaciones)
     return usuarios, puntuaciones
 
 
@@ -466,7 +489,7 @@ def obtenerDatosUsuarios(cur):
         'phishing': [],
         'cliclados': [],
         'contrasenadebil': [],
-        'etiquetas':[]
+        'etiquetas': []
     }
 
     # Iterar sobre los resultados y agregarlos al diccionario
@@ -494,31 +517,32 @@ def obtenerDatosUsuarios(cur):
 
         # Aquí puedes acceder a otros datos del usuario según sea necesario
 
-
     return Datos
-def calcular_puntuaciones_usuarios_criticosPrueba(cur, num): #la puntuación hay que multiplicar por 100 el nº de fishing para que no de 0, algo; da directamente la probabilidad
+
+
+def calcular_puntuaciones_usuarios_criticosPrueba(cur,
+                                                  num):  # la puntuación hay que multiplicar por 100 el nº de fishing para que no de 0, algo; da directamente la probabilidad
     consulta_sql = """
             SELECT username, (phishing*100 / total) AS puntuacion
-            FROM usuarios WHERE es_contrasena_debil==1
+            FROM usuarios WHERE critico == 1
             ORDER BY puntuacion DESC
             LIMIT ?
         """
     cur.execute(consulta_sql, (num,))
-    resultados=cur.fetchall()
+    resultados = cur.fetchall()
     usuarios = [row[0] for row in resultados]
     puntuaciones = [row[1] for row in resultados]
-    #print("usuarios",end="")
-    #print(usuarios)
-    #print("puntuaciones",end="")
-    #print(puntuaciones)
+    # print("usuarios",end="")
+    # print(usuarios)
+    # print("puntuaciones",end="")
+    # print(puntuaciones)
     return usuarios, puntuaciones
+
 
 def calcular_puntuaciones_usuarios_Mayor50(cur):
-
-
     consulta_sql = """
             SELECT username, (phishing * 100 / total) AS puntuacion
-            FROM usuarios WHERE (((cliclados * 100 / phishing)) > 50)
+            FROM usuarios WHERE (((cliclados * 100 / phishing)) > 50) AND critico == 1
             ORDER BY puntuacion DESC
         """
     cur.execute(consulta_sql)
@@ -526,12 +550,12 @@ def calcular_puntuaciones_usuarios_Mayor50(cur):
     usuarios = [row[0] for row in resultados]
     puntuaciones = [row[1] for row in resultados]
     return usuarios, puntuaciones
+
+
 def calcular_puntuaciones_usuarios_Menor50(cur):
-
-
     consulta_sql = """
             SELECT username, (phishing * 100 / total) AS puntuacion
-            FROM usuarios WHERE (((cliclados * 100 / phishing)) < 50)
+            FROM usuarios WHERE (((cliclados * 100 / phishing)) < 50) AND critico == 1
             ORDER BY puntuacion DESC
         """
     cur.execute(consulta_sql)
@@ -539,6 +563,7 @@ def calcular_puntuaciones_usuarios_Menor50(cur):
     usuarios = [row[0] for row in resultados]
     puntuaciones = [row[1] for row in resultados]
     return usuarios, puntuaciones
+
 
 def obtenerDatosUsuarios(cur):
     consulta_sql = """
@@ -592,7 +617,9 @@ def obtenerDatosUsuarios(cur):
         critico = usuario[list(usuario.keys())[0]]['critico']
         Datos['etiquetas'].append(critico)
     return Datos
-def calcular_politicas_desactualizadasOriginal(cur, num): #que es desactualizada, menor a que año?
+
+
+def calcular_politicas_desactualizadasOriginal(cur, num):  # que es desactualizada, menor a que año?
     cur.execute("""
         SELECT url, SUM(cookies + aviso + proteccionDatos) AS politicas_desactualizadas
         FROM legalData
@@ -603,30 +630,32 @@ def calcular_politicas_desactualizadasOriginal(cur, num): #que es desactualizada
     resultados = cur.fetchall()
     paginas_web = [row[0] for row in resultados]
     politicas = [row[1] for row in resultados]
-    #print("paginas web", end="")
-    #print(paginas_web)
-    #print("politicas", end="")
-    #print(politicas) #en base al numero de politicas que tiene
+    # print("paginas web", end="")
+    # print(paginas_web)
+    # print("politicas", end="")
+    # print(politicas) #en base al numero de politicas que tiene
     return paginas_web, politicas
-#pag,politicas=calcular_politicas_desactualizadas(cur)
+
+
+# pag,politicas=calcular_politicas_desactualizadas(cur)
 
 def calcular_politicas_desactualizadasPrueba(cur, num):
-    consulta="""
+    consulta = """
         SELECT url, SUM(cookies + aviso + proteccionDatos) AS politicas_desactualizadas
         FROM legalData
         GROUP BY url
         ORDER BY politicas_desactualizadas ASC,creacion ASC
         LIMIT ?
     """
-    #Ordenarlo por ascendentes coge los que no tienen los valores de cookie, avisos o proteccion de datos
-    cur.execute(consulta,(num,))
+    # Ordenarlo por ascendentes coge los que no tienen los valores de cookie, avisos o proteccion de datos
+    cur.execute(consulta, (num,))
     resultados = cur.fetchall()
     paginas_web = [row[0] for row in resultados]
     politicas = [row[1] for row in resultados]
-    #print("paginas web", end="")
-    #print(paginas_web)
-    #print("politicas", end="")
-    #print(politicas) #en base al numero de politicas que tiene
+    # print("paginas web", end="")
+    # print(paginas_web)
+    # print("politicas", end="")
+    # print(politicas) #en base al numero de politicas que tiene
     return paginas_web, politicas
 
 
@@ -642,17 +671,19 @@ def calcular_cumplimiento_politicas_por_anio(cur):
     anios = [row[0] for row in resultados]
     cumplen = [row[1] for row in resultados]
     no_cumplen = [row[2] for row in resultados]
-    #print("años", end="")
-    #print(anios)
-    #print("cumplen politicas", end="")
-    #print(cumplen)
-    #print("no cumplen todas las politicas", end="")
-    #print(no_cumplen)
+    # print("años", end="")
+    # print(anios)
+    # print("cumplen politicas", end="")
+    # print(cumplen)
+    # print("no cumplen todas las politicas", end="")
+    # print(no_cumplen)
     return anios, cumplen, no_cumplen
 
-#an,cum,no_cum=calcular_cumplimiento_politicas_por_anio(cur)
 
-def top50percent(cur, string): #la puntuación hay que multiplicar por 100 el nº de fishing para que no de 0, algo; da directamente la probabilidad
+# an,cum,no_cum=calcular_cumplimiento_politicas_por_anio(cur)
+
+def top50percent(cur,
+                 string):  # la puntuación hay que multiplicar por 100 el nº de fishing para que no de 0, algo; da directamente la probabilidad
     cur.execute("""
         SELECT username, (cliclados / phishing) AS puntuacion
         FROM usuarios WHERE es_contrasena_debil==1
@@ -662,18 +693,20 @@ def top50percent(cur, string): #la puntuación hay que multiplicar por 100 el n�
     resultados = cur.fetchall()
     usuarios = [row[0] for row in resultados]
     puntuaciones = [row[1] for row in resultados]
-    #print("usuarios",end="")
-    #print(usuarios)
-    #print("puntuaciones",end="")
-    #print(puntuaciones)
+    # print("usuarios",end="")
+    # print(usuarios)
+    # print("puntuaciones",end="")
+    # print(puntuaciones)
     return usuarios, puntuaciones
 
-def crearTablaLogin (con, cur):
+
+def crearTablaLogin(con, cur):
     cur.execute('''CREATE TABLE IF NOT EXISTS login (
                         username TEXT PRIMARY KEY,
                         password TEXT
                     )''')
     con.commit()
+
 
 def registrar_usuario(cur, conn, uname, password):
     cur.execute('''SELECT * FROM login WHERE username = ? ''', (uname,))
@@ -682,6 +715,8 @@ def registrar_usuario(cur, conn, uname, password):
         conn.commit()
         return True
     return False
+
+
 def consultalogin(cur, username, password):
     cur.execute('''SELECT * FROM login WHERE username = ? AND password = ?''', (username, password))
     usuario = cur.fetchone()
