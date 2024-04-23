@@ -1,11 +1,41 @@
 {% extends "layout.html" %}
 {% block main %}
+<section class="container mt-5"></section>
+<section class="wrapper">
+    <div class="container">
+        <div class="row">
+            <div class="col text-center mb-1">
+                <h1 class="display-4 font-weight-bolder">Usuarios Críticos</h1>
+                <p class="lead">Pulsa en el botón para obtener el top X de usuarios criticos</p>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="wrapper">
+    <div class="text-center">
+        <div>
+            <button class="btn card-button mr-2" onclick="window.location.href='/formulario/critico'">Usuarios Críticos</button>
+        </div>
+    </div>
+</section>
+
+<section class="wrapper">
+    <div class="container">
+        <div class="row">
+            <div class="col text-center mb-1">
+                <h1 class="display-4 font-weight-bolder">Políticas</h1>
+            </div>
+        </div>
+    </div>
+</section>
 <div>
-                <li class="nav-item active">
-                    <a class="nav-link px-3 active" href="/formulario/critico">Usuarios Críticos</a>
-                </li>
-                <li class="nav-item active">
-                    <a class="nav-link px-3 active" href="/formulario/politicas">Políticas</a>
-                </li>
-</div>
+<section class="wrapper">
+    <div class="text-center">
+        <div>
+            <p class="lead">Pulsa en el botón para obtener el top X de páginas web vulnerables</p>
+            <button class="btn card-button mr-2" onclick="window.location.href='/formulario/politicas'">Pagina web vulnerable</button>
+        </div>
+    </div>
+</section>
+
 {% endblock %}
