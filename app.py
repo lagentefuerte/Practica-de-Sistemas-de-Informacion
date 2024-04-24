@@ -13,6 +13,8 @@ from sklearn.model_selection import train_test_split
 from consultas import *
 import json
 import os
+from sklearn.metrics import mean_squared_error, r2_score
+import numpy as np
 def conectar_base_datos():
     return sqlite3.connect('example2.db')
 
@@ -226,20 +228,46 @@ def metodoss():
 
     # Dividir los datos en conjuntos de entrenamiento y prueba
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    print(len(X_train))
+    print(len(y_train))
 
     # Inicializar y entrenar el modelo de Regresión Logística
     modelo = tree.DecisionTreeClassifier()
-
     modelo.fit(X_train, y_train)
     text_representation = tree.export_text(modelo)
     print(text_representation)
+
+    #Modelo de regresión lineal
+    PruebaArray = []
+    for i in range(0, len(X_train)):
+        PruebaArray.append(X_train.iloc[i]['cliclados'] / X_train.iloc[i]['total'])
+
+    # Convertir PruebaArray en un array bidimensional
+    PruebaArray = np.array(PruebaArray).reshape(-1, 1)
+    print("HOLA")
+    modeloLineal = linear_model.LinearRegression()
+    modeloLineal.fit(PruebaArray, y_train)
+    print(modeloLineal.coef_)
+    grafico(modeloLineal, X_test, y_test)
+
+
+
     # Predecir para un nuevo usuario
+    username = request.form['username']
+    phone = request.form['phone']
+    passwordHash = request.form['password']
+    permisos = request.form['permisos']
+    total = request.form['total']
+    phishing = request.form['phishing']
+    clicados = request.form['clicados']
+    contrasena_debil = esContrasenaDebil(passwordHash)
+    metodoInteligencia = request.form['metodoInt']
     nuevoUsuario = {
-        'phishing': [256],
-        'total': [300],
-        'contrasenadebil': [0],
-        'permisos': [0],
-        'cliclados': [100]
+        'phishing': phishing,
+        'total': total,
+        'contrasenadebil': contrasena_debil,
+        'permisos': permisos,
+        'cliclados': clicados
     }
 
     nuevo_usuario_df = pd.DataFrame(nuevoUsuario)
@@ -266,6 +294,55 @@ def metodoss():
     # Renderiza la plantilla 'metoditos.html' y pasa la ruta de la imagen
     return render_template('metoditos.html', image_path='test.png')
 
+def grafico(modeloLineal, X_test, y_test):
+    # Predecir los valores de y
+    PruebaArrayModelo = []
+    for i in range(0, len(X_test)):
+        PruebaArrayModelo.append(X_test.iloc[i]['cliclados'] / X_test.iloc[i]['total'])
+
+    PruebaArrayModelo = np.array(PruebaArrayModelo).reshape(-1, 1)
+    y_pred = modeloLineal.predict(PruebaArrayModelo)
+
+
+
+
+    # Crear un gráfico de dispersión con los datos de entrenamiento
+    plt.scatter(PruebaArrayModelo,y_test, color='red')
+
+    # Dibujar la línea de regresión
+    plt.plot(PruebaArrayModelo,y_pred, color='blue')
+
+    # Etiquetas de los ejes
+    plt.xlabel('Clicados respecto del total')
+    plt.ylabel('Critico o no critico')
+
+    # Guardar el gráfico como una imagen PNG
+    plt.savefig('regression_line.png')
+
+    # Mostrar el gráfico
+    plt.show()
+
+
+
+@app.route('/last10vulnerabilities')
+def vulnerabilidades():
+    response = requests.get('https://cve.circl.lu/api/last')
+    data = response.json()
+    last_10_entries = data[:10]
+
+    #PARA VER EL FORMATO DEL JSON QUE SE OBTIENE
+    #with open('last_10_vulnerabilities.json', 'w') as json_file:
+     #   json.dump(last_10_entries, json_file)
+
+    return render_template('Ejercicio3.html',datos=last_10_entries)
+
+@login_required
+@app.route('/top50', methods=['GET']) #peticion get /top50?string=(true/false)
+def ejercicio2():
+    if (request.args.get('string') == "true"):
+        top50percent(cur, "DESC")
+    else:
+            top50percent(cur, "ASC")
 
 
 """
