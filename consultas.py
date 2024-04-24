@@ -540,7 +540,7 @@ def calcular_puntuaciones_usuarios_criticosPrueba(cur,num):  # la puntuación ha
 
 def calcular_puntuaciones_usuarios_Mayor50(cur,num):
     consulta_sql = """
-            SELECT username, (phishing * 100 / total) AS puntuacion
+            SELECT username, (cliclados * 100 / phishing) AS puntuacion
             FROM usuarios WHERE (((cliclados * 100 / phishing)) > 50) AND critico == 1
             ORDER BY puntuacion DESC
             LIMIT ?
@@ -554,7 +554,7 @@ def calcular_puntuaciones_usuarios_Mayor50(cur,num):
 
 def calcular_puntuaciones_usuarios_Menor50(cur,num):
     consulta_sql = """
-            SELECT username, (phishing * 100 / total) AS puntuacion
+            SELECT username, (cliclados * 100 / phishing) AS puntuacion
             FROM usuarios WHERE (((cliclados * 100 / phishing)) < 50) AND critico == 1
             ORDER BY puntuacion DESC
             LIMIT ?
