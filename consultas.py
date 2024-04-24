@@ -522,9 +522,9 @@ def obtenerDatosUsuarios(cur):
 
 def calcular_puntuaciones_usuarios_criticosPrueba(cur,num):  # la puntuación hay que multiplicar por 100 el nº de fishing para que no de 0, algo; da directamente la probabilidad
     consulta_sql = """
-            SELECT username, (phishing*100 / total) AS puntuacion
+            SELECT username, ((cliclados * 100 / phishing)) AS puntuacion_phising
             FROM usuarios WHERE critico == 1
-            ORDER BY puntuacion DESC
+            ORDER BY puntuacion_phising DESC
             LIMIT ?
         """
     cur.execute(consulta_sql, (num,))
