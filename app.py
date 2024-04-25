@@ -2,6 +2,7 @@ import sqlite3, requests
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
 from flask import Flask, render_template, request, redirect, url_for, abort
 from sklearn import tree
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import export_graphviz
 import graphviz
 from xhtml2pdf import pisa
@@ -15,6 +16,7 @@ import json
 import os
 from sklearn.metrics import mean_squared_error, r2_score
 import numpy as np
+from subprocess import call
 def conectar_base_datos():
     return sqlite3.connect('example2.db')
 
@@ -204,7 +206,7 @@ def registro():
 EJERCICIO 5: Algorigtmo IA
 """
 
-@app.route('/metodos')
+@app.route('/metodos', methods=['POST'])
 def metodoss():
     # Conectar a la base de datos (debes definir esta función)
     con = conectar_base_datos()
@@ -231,7 +233,7 @@ def metodoss():
     print(len(X_train))
     print(len(y_train))
 
-    # Inicializar y entrenar el modelo de Regresión Logística
+    #Modelo Decision TREE
     modelo = tree.DecisionTreeClassifier()
     modelo.fit(X_train, y_train)
     text_representation = tree.export_text(modelo)
@@ -250,7 +252,21 @@ def metodoss():
     print(modeloLineal.coef_)
     grafico(modeloLineal, X_test, y_test)
 
+    #Modelo Ramdom Forest
+    modeloForest = RandomForestClassifier(max_depth=2, random_state=0,n_estimators=10)
+    modeloForest.fit(X_train, y_train)
 
+    for i in range(len(modeloForest.estimators_)):
+        estimator = modeloForest.estimators_[i]
+        # Exportar cada árbol a un archivo .dot diferente
+        export_graphviz(estimator,
+                        out_file='tree' + str(i) + '.dot',
+                        feature_names=X.columns.tolist(),
+                        class_names=['0', '1'],
+                        rounded=True, proportion=False,
+                        precision=2, filled=True)
+        # Convertir cada archivo .dot a una imagen PNG diferente
+        call(['dot', '-Tpng', 'tree' + str(i) + '.dot', '-o', 'tree' + str(i) + '.png', '-Gdpi=600'])
 
     # Predecir para un nuevo usuario
     username = request.form['username']
@@ -269,16 +285,24 @@ def metodoss():
         'permisos': permisos,
         'cliclados': clicados
     }
-
-    nuevo_usuario_df = pd.DataFrame(nuevoUsuario)
-    prediccion = modelo.predict(nuevo_usuario_df)
+    if metodoInteligencia == '2':
+        nuevo_usuario_df = pd.DataFrame(nuevoUsuario)
+        prediccion = modelo.predict(nuevo_usuario_df)
+    elif metodoInteligencia == '1':
+        nuevoUsuario['cliclados_total'] = int (nuevoUsuario['cliclados']) / int(nuevoUsuario['total'])
+        nuevo_usuario_df = pd.DataFrame([nuevoUsuario['cliclados_total']],
+                                        columns=['cliclados_total'])  # Asegúrate de pasar una lista de diccionarios
+        prediccion = modeloLineal.predict(nuevo_usuario_df)
+    else:
+        nuevo_usuario_df = pd.DataFrame(nuevoUsuario)
+        prediccion = modeloForest.predict(nuevo_usuario_df)
 
     if prediccion < 0.5:
         etiqueta_predicha = "No crítico"
     else:
         etiqueta_predicha = "Crítico"
 
-    print("La etiqueta predicha para el nuevo usuario es:", etiqueta_predicha)
+
 
 
 
@@ -292,7 +316,7 @@ def metodoss():
     graph.render('test', format='png')
 
     # Renderiza la plantilla 'metoditos.html' y pasa la ruta de la imagen
-    return render_template('metoditos.html', image_path='test.png')
+    return render_template('metoditos.html', etiqueta = etiqueta_predicha)
 
 def grafico(modeloLineal, X_test, y_test):
     # Predecir los valores de y
@@ -321,29 +345,6 @@ def grafico(modeloLineal, X_test, y_test):
 
     # Mostrar el gráfico
     plt.show()
-
-
-
-@app.route('/last10vulnerabilities')
-def vulnerabilidades():
-    response = requests.get('https://cve.circl.lu/api/last')
-    data = response.json()
-    last_10_entries = data[:10]
-
-    #PARA VER EL FORMATO DEL JSON QUE SE OBTIENE
-    #with open('last_10_vulnerabilities.json', 'w') as json_file:
-     #   json.dump(last_10_entries, json_file)
-
-    return render_template('Ejercicio3.html',datos=last_10_entries)
-
-@login_required
-@app.route('/top50', methods=['GET']) #peticion get /top50?string=(true/false)
-def ejercicio2():
-    if (request.args.get('string') == "true"):
-        top50percent(cur, "DESC")
-    else:
-            top50percent(cur, "ASC")
-
 
 """
 EJERCICIO 5.2: Datos para decicisión sobre usuario
