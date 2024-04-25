@@ -1,22 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Verificación de Usuario</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-    <header>
-        <h1>Verificación de Usuario</h1>
-    </header>
-    <main>
-        <section>
-            <h2>Resultado de la verificación</h2>
-            <p>El usuario introducido es: <strong>{{ etiqueta }}</strong></p>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2023 - Juankamdz</p>
-    </footer>
-</body>
-</html>
+{% extends "layout.html" %}
+{% block main %}
+<section class="container mt-2">
+    <div class="mx-auto mb-3" style="text-align: center; font-weight: bold; font-size: 24px;">Verificación de Usuario</div>
+     <div class="mx-auto">
+      <div>
+          <strong>Resultado de la verificación:</strong>
+          <p>El usuario introducido es: <strong>{{ etiqueta }}</strong></p>
+      </div>
+    </div>
+</section>
+{% endblock %}

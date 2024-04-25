@@ -234,7 +234,8 @@ def metodoss():
     #Modelo Decision TREE
     modelo = tree.DecisionTreeClassifier()
     modelo.fit(X_train, y_train)
-    
+    text_representation = tree.export_text(modelo)
+    print(text_representation)
 
 
     #Modelo de regresión lineal
@@ -273,7 +274,7 @@ def metodoss():
         'cliclados': clicados
     }
     if metodoInteligencia == '2':
-        nuevo_usuario_df = pd.DataFrame(nuevoUsuario)
+        nuevo_usuario_df = pd.DataFrame([nuevoUsuario])
         prediccion = modelo.predict(nuevo_usuario_df)
     elif metodoInteligencia == '1':
         nuevoUsuario['cliclados_total'] = int (nuevoUsuario['cliclados']) / int(nuevoUsuario['total'])
@@ -281,13 +282,18 @@ def metodoss():
                                         columns=['cliclados_total'])  # Asegúrate de pasar una lista de diccionarios
         prediccion = modeloLineal.predict(nuevo_usuario_df)
     else:
-        nuevo_usuario_df = pd.DataFrame(nuevoUsuario)
+        nuevo_usuario_df = pd.DataFrame([nuevoUsuario])
         prediccion = modeloForest.predict(nuevo_usuario_df)
-
-    if prediccion < 0.5:
-        etiqueta_predicha = "No crítico"
+    if metodoInteligencia == '1':
+        if prediccion < 0.5:
+            etiqueta_predicha = "No crítico"
+        else:
+            etiqueta_predicha = "Crítico"
     else:
-        etiqueta_predicha = "Crítico"
+        if prediccion == 0:
+            etiqueta_predicha = "No crítico"
+        else:
+            etiqueta_predicha = "Crítico"
 
     # Renderiza la plantilla 'metoditos.html' y pasa la ruta de la imagen
     return render_template('metoditos.html', etiqueta = etiqueta_predicha)
