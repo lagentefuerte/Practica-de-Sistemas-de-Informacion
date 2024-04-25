@@ -228,46 +228,33 @@ def metodoss():
     X = train[['phishing', 'total', 'contrasenadebil', 'permisos', 'cliclados']]
     y = train['etiquetas']
 
-    # Dividir los datos en conjuntos de entrenamiento y prueba
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    print(len(X_train))
-    print(len(y_train))
+
 
     #Modelo Decision TREE
     modelo = tree.DecisionTreeClassifier()
     modelo.fit(X_train, y_train)
-    text_representation = tree.export_text(modelo)
-    print(text_representation)
+    
+
 
     #Modelo de regresión lineal
     PruebaArray = []
     for i in range(0, len(X_train)):
         PruebaArray.append(X_train.iloc[i]['cliclados'] / X_train.iloc[i]['total'])
-
-    # Convertir PruebaArray en un array bidimensional
     PruebaArray = np.array(PruebaArray).reshape(-1, 1)
-    print("HOLA")
     modeloLineal = linear_model.LinearRegression()
     modeloLineal.fit(PruebaArray, y_train)
     print(modeloLineal.coef_)
-    grafico(modeloLineal, X_test, y_test)
+
 
     #Modelo Ramdom Forest
     modeloForest = RandomForestClassifier(max_depth=2, random_state=0,n_estimators=10)
     modeloForest.fit(X_train, y_train)
 
-    for i in range(len(modeloForest.estimators_)):
-        estimator = modeloForest.estimators_[i]
-        # Exportar cada árbol a un archivo .dot diferente
-        export_graphviz(estimator,
-                        out_file='tree' + str(i) + '.dot',
-                        feature_names=X.columns.tolist(),
-                        class_names=['0', '1'],
-                        rounded=True, proportion=False,
-                        precision=2, filled=True)
-        # Convertir cada archivo .dot a una imagen PNG diferente
-        call(['dot', '-Tpng', 'tree' + str(i) + '.dot', '-o', 'tree' + str(i) + '.png', '-Gdpi=600'])
-
+    #Graficos
+    grafico(modeloLineal, X_test, y_test)
+    graficoRamdomForest(modeloForest,X)
+    graficoDecisionTree(modelo, X)
     # Predecir para un nuevo usuario
     username = request.form['username']
     phone = request.form['phone']
@@ -302,10 +289,28 @@ def metodoss():
     else:
         etiqueta_predicha = "Crítico"
 
+    # Renderiza la plantilla 'metoditos.html' y pasa la ruta de la imagen
+    return render_template('metoditos.html', etiqueta = etiqueta_predicha)
 
-
-
-
+def grafico(modeloLineal, X_test, y_test):
+    # Predecir los valores de y
+    PruebaArrayModelo = []
+    for i in range(0, len(X_test)):
+        PruebaArrayModelo.append(X_test.iloc[i]['cliclados'] / X_test.iloc[i]['total'])
+    PruebaArrayModelo = np.array(PruebaArrayModelo).reshape(-1, 1)
+    y_pred = modeloLineal.predict(PruebaArrayModelo)
+    # Crear un gráfico de dispersión con los datos de entrenamiento
+    plt.scatter(PruebaArrayModelo,y_test, color='red')
+    # Dibujar la línea de regresión
+    plt.plot(PruebaArrayModelo,y_pred, color='blue')
+    # Etiquetas de los ejes
+    plt.xlabel('Clicados respecto del total')
+    plt.ylabel('Critico o no critico')
+    # Guardar el gráfico como una imagen PNG
+    plt.savefig('regression_line.png')
+    # Mostrar el gráfico
+    plt.show()
+def graficoDecisionTree(modelo,X):
     # Exportar el árbol de decisiones a un archivo .dot
     dot_data = export_graphviz(modelo, out_file=None,
                                feature_names=X.columns.tolist(),
@@ -315,37 +320,18 @@ def metodoss():
     graph = graphviz.Source(dot_data)
     graph.render('test', format='png')
 
-    # Renderiza la plantilla 'metoditos.html' y pasa la ruta de la imagen
-    return render_template('metoditos.html', etiqueta = etiqueta_predicha)
-
-def grafico(modeloLineal, X_test, y_test):
-    # Predecir los valores de y
-    PruebaArrayModelo = []
-    for i in range(0, len(X_test)):
-        PruebaArrayModelo.append(X_test.iloc[i]['cliclados'] / X_test.iloc[i]['total'])
-
-    PruebaArrayModelo = np.array(PruebaArrayModelo).reshape(-1, 1)
-    y_pred = modeloLineal.predict(PruebaArrayModelo)
-
-
-
-
-    # Crear un gráfico de dispersión con los datos de entrenamiento
-    plt.scatter(PruebaArrayModelo,y_test, color='red')
-
-    # Dibujar la línea de regresión
-    plt.plot(PruebaArrayModelo,y_pred, color='blue')
-
-    # Etiquetas de los ejes
-    plt.xlabel('Clicados respecto del total')
-    plt.ylabel('Critico o no critico')
-
-    # Guardar el gráfico como una imagen PNG
-    plt.savefig('regression_line.png')
-
-    # Mostrar el gráfico
-    plt.show()
-
+def graficoRamdomForest(modeloForest,X):
+    for i in range(len(modeloForest.estimators_)):
+        estimator = modeloForest.estimators_[i]
+        # Exportar cada árbol a un archivo .dot diferente
+        export_graphviz(estimator,
+                        out_file='tree' + str(i) + '.dot',
+                        feature_names=X.columns.tolist(),
+                        class_names=['0', '1'],
+                        rounded=True, proportion=False,
+                        precision=2, filled=True)
+        # Convertir cada archivo .dot a una imagen PNG diferente
+        call(['dot', '-Tpng', 'tree' + str(i) + '.dot', '-o', 'tree' + str(i) + '.png', '-Gdpi=600'])
 """
 EJERCICIO 5.2: Datos para decicisión sobre usuario
 """
