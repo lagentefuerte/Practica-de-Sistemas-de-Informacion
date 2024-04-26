@@ -541,7 +541,7 @@ def calcular_puntuaciones_usuarios_criticosPrueba(cur,num):  # la puntuación ha
 def calcular_puntuaciones_usuarios_Mayor50(cur,num):
     consulta_sql = """
             SELECT username, (cliclados * 100 / phishing) AS puntuacion
-            FROM usuarios WHERE (((cliclados * 100 / phishing)) > 50) AND critico == 1
+            FROM usuarios WHERE (puntuacion > 50) AND critico == 1
             ORDER BY puntuacion DESC
             LIMIT ?
         """
@@ -555,7 +555,7 @@ def calcular_puntuaciones_usuarios_Mayor50(cur,num):
 def calcular_puntuaciones_usuarios_Menor50(cur,num):
     consulta_sql = """
             SELECT username, (cliclados * 100 / phishing) AS puntuacion
-            FROM usuarios WHERE (((cliclados * 100 / phishing)) < 50) AND critico == 1
+            FROM usuarios WHERE (puntuacion < 50) AND critico == 1
             ORDER BY puntuacion DESC
             LIMIT ?
         """
@@ -648,7 +648,7 @@ def calcular_politicas_desactualizadasPrueba(cur, num):
         ORDER BY politicas_desactualizadas ASC,creacion ASC
         LIMIT ?
     """
-    # Ordenarlo por ascendentes coge los que no tienen los valores de cookie, avisos o proteccion de datos
+    # Ordenarlo por ascendentes coge los que tienen los valores de cookie, avisos o proteccion de datos más bajos primero
     cur.execute(consulta, (num,))
     resultados = cur.fetchall()
     paginas_web = [row[0] for row in resultados]
