@@ -211,6 +211,33 @@ def metodoss():
     # Conectar a la base de datos (debes definir esta función)
     con = conectar_base_datos()
     cur = con.cursor()
+
+    #recoger datos para nuevo usuario
+    username = request.form['username']
+    phone = request.form['phone']
+    passwordHash = request.form['password']
+    permisos = request.form['permisos']
+    total = request.form['total']
+    if int(total) == 0:
+        abort(400)
+    phishing = request.form['phishing']
+    clicados = request.form['clicados']
+    contrasena_debil = esContrasenaDebil(passwordHash)
+    metodoInteligencia = request.form['metodoInt']
+    nuevoUsuario = {
+        'phishing': phishing,
+        'total': total,
+        'contrasenadebil': contrasena_debil,
+        'permisos': permisos,
+        'cliclados': clicados
+    }
+
+
+
+
+
+
+
     # Agregar la ruta al directorio binario de Graphviz al entorno
     os.environ["PATH"] += os.pathsep + 'C:/Program Files/Graphviz/bin/'
     # Obtener los datos de los usuarios
@@ -256,23 +283,10 @@ def metodoss():
     grafico(modeloLineal, X_test, y_test)
     graficoRamdomForest(modeloForest,X)
     graficoDecisionTree(modelo, X)
+
+
     # Predecir para un nuevo usuario
-    username = request.form['username']
-    phone = request.form['phone']
-    passwordHash = request.form['password']
-    permisos = request.form['permisos']
-    total = request.form['total']
-    phishing = request.form['phishing']
-    clicados = request.form['clicados']
-    contrasena_debil = esContrasenaDebil(passwordHash)
-    metodoInteligencia = request.form['metodoInt']
-    nuevoUsuario = {
-        'phishing': phishing,
-        'total': total,
-        'contrasenadebil': contrasena_debil,
-        'permisos': permisos,
-        'cliclados': clicados
-    }
+
     if metodoInteligencia == '2':
         nuevo_usuario_df = pd.DataFrame([nuevoUsuario])
         prediccion = modelo.predict(nuevo_usuario_df)
@@ -345,28 +359,6 @@ EJERCICIO 5.2: Datos para decicisión sobre usuario
 @app.route('/recogidaDatos')
 def mostrat_recogida_datos():
     return render_template('datosUsuario.html')
-
-
-@app.route('/verificarUsuario', methods=['POST'])
-def nuevoUsuario():
-    username = request.form['username']
-    phone = request.form['phone']
-    passwordHash = request.form['password']
-    permisos = request.form['permisos']
-    total = request.form['total']
-    phishing = request.form['phishing']
-    clicados = request.form['clicados']
-    contrasena_debil = esContrasenaDebil(passwordHash)
-    metodoInteligencia=request.form['metodoInt']
-    """"
-    1->Regresión Lineal
-    2->Árbol de Decisión
-    3->Bosque Aleatorio
-    """
-
-    #TODO MEZCLARLO CON EL METODO DE JUANCARLOS
-    #return redirect('/') #TODO: devolver la misma página de
-    return redirect(url_for('metodo', username=username, phone=phone, password=passwordHash, permisos=permisos, total=total, phishing=phishing, clicados=clicados, metodoInteligencia=metodoInteligencia))
 
 
 def esContrasenaDebil(passwordHash):
