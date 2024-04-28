@@ -1,6 +1,6 @@
 import sqlite3, requests
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
-from flask import Flask, render_template, request, redirect, url_for, abort
+from flask import Flask, render_template, request, redirect, url_for, abort, g, session, app
 from sklearn import tree
 from sklearn.tree import export_graphviz
 import graphviz
@@ -13,6 +13,8 @@ from sklearn.model_selection import train_test_split
 from consultas import *
 import json
 import os
+
+
 def conectar_base_datos():
     return sqlite3.connect('example2.db')
 
@@ -30,6 +32,12 @@ app.secret_key = 'clave_muy_secreta'
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+
+#Before request para plantillas (login)
+
+@app.before_request
+def before_request():
+    g.logged_in = session.get('logged_in', False)
 
 
 """
@@ -171,6 +179,8 @@ def login():
         if consultalogin(cur, username, password):
             user = User(username)
             login_user(user)
+            session['logged_in'] = True
+            g.logged_in = True
             return redirect(url_for('indice'))
         else:
             return 'Usuario o contraseña incorrectos'
@@ -180,6 +190,7 @@ def login():
 @login_required
 def logout():
     logout_user()
+    session.pop('logged_in', None)
     return redirect(url_for('indice'))
 
 
