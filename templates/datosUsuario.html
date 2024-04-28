@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
 {% block main %}
-<form action="/verificarUsuario" method="post">
+<form action="/metodos" method="post">
   <label for="username">Username:</label><br>
   <input type="text" id="username" name="username"><br>
   <label for="phone">Phone Number:</label><br>
   <input type="text" id="phone" name="phone"><br>
-  <label for="passwordHash">Password:</label><br>
+  <label for="passwordHash">PasswordHash:</label><br>
   <input type="text" id="passwordHash" name="password"><br>
   <label for="permisos">Permisos:</label><br>
   <select id="permisos" name="permisos">

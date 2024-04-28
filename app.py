@@ -2,6 +2,7 @@ import sqlite3, requests
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
 from flask import Flask, render_template, request, redirect, url_for, abort, g, session, app
 from sklearn import tree
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import export_graphviz
 import graphviz
 from xhtml2pdf import pisa
@@ -13,7 +14,9 @@ from sklearn.model_selection import train_test_split
 from consultas import *
 import json
 import os
-
+from sklearn.metrics import mean_squared_error, r2_score, accuracy_score
+import numpy as np
+from subprocess import call
 
 def conectar_base_datos():
     return sqlite3.connect('example2.db')
@@ -213,58 +216,127 @@ def registro():
 EJERCICIO 5: Algorigtmo IA
 """
 
-@app.route('/metodos')
+@app.route('/metodos', methods=['POST'])
 def metodoss():
     # Conectar a la base de datos (debes definir esta función)
     con = conectar_base_datos()
     cur = con.cursor()
-    # Agregar la ruta al directorio binario de Graphviz al entorno
+
+    #recoger datos para nuevo usuario
+    username = request.form['username']
+    phone = request.form['phone']
+    passwordHash = request.form['password']
+    permisos = request.form['permisos']
+    total = request.form['total']
+    if int(total) == 0:
+        abort(400)
+    phishing = request.form['phishing']
+    clicados = request.form['clicados']
+    contrasena_debil = esContrasenaDebil(passwordHash)
+    metodoInteligencia = request.form['metodoInt']
+    nuevoUsuario = {
+        'phishing': phishing,
+        'total': total,
+        'contrasenadebil': contrasena_debil,
+        'permisos': permisos,
+        'cliclados': clicados
+    }
+
+
+
+
+
+
+
+
     os.environ["PATH"] += os.pathsep + 'C:/Program Files/Graphviz/bin/'
     # Obtener los datos de los usuarios
     Datos = obtenerDatosUsuarios(cur)
     cur.close()
 
-    # Convertir el diccionario en un DataFrame
     df_usuarios = pd.DataFrame(Datos)
 
-    # Leer los datos desde el archivo CSV
     df_usuarios.to_csv('usuarios.csv', index=False)
     train = pd.read_csv('usuarios.csv')
 
-    # Separar las características (X) y la etiqueta (y)
+
     X = train[['phishing', 'total', 'contrasenadebil', 'permisos', 'cliclados']]
     y = train['etiquetas']
 
-    # Dividir los datos en conjuntos de entrenamiento y prueba
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # Inicializar y entrenar el modelo de Regresión Logística
+
+    #Modelo Decision TREE
     modelo = tree.DecisionTreeClassifier()
-
     modelo.fit(X_train, y_train)
-    text_representation = tree.export_text(modelo)
-    print(text_representation)
+
+
+    #Modelo de regresión lineal
+    PruebaArray = []
+    for i in range(0, len(X_train)):
+        PruebaArray.append(X_train.iloc[i]['cliclados'] / X_train.iloc[i]['total'])
+    PruebaArray = np.array(PruebaArray).reshape(-1, 1)
+    modeloLineal = linear_model.LinearRegression()
+    modeloLineal.fit(PruebaArray, y_train)
+    print(modeloLineal.coef_)
+
+    #Modelo Ramdom Forest
+    modeloForest = RandomForestClassifier(max_depth=2, random_state=0,n_estimators=10)
+    modeloForest.fit(X_train, y_train)
+
+    #Graficos
+    grafico(modeloLineal, X_test, y_test)
+    graficoRamdomForest(modeloForest,X)
+    graficoDecisionTree(modelo, X)
+
+
     # Predecir para un nuevo usuario
-    nuevoUsuario = {
-        'phishing': [256],
-        'total': [300],
-        'contrasenadebil': [0],
-        'permisos': [0],
-        'cliclados': [100]
-    }
 
-    nuevo_usuario_df = pd.DataFrame(nuevoUsuario)
-    prediccion = modelo.predict(nuevo_usuario_df)
-
-    if prediccion < 0.5:
-        etiqueta_predicha = "No crítico"
+    if metodoInteligencia == '2':
+        nuevo_usuario_df = pd.DataFrame([nuevoUsuario])
+        prediccion = modelo.predict(nuevo_usuario_df)
+    elif metodoInteligencia == '1':
+        nuevoUsuario['cliclados_total'] = int (nuevoUsuario['cliclados']) / int(nuevoUsuario['total'])
+        nuevo_usuario_df = pd.DataFrame([nuevoUsuario['cliclados_total']],
+                                        columns=['cliclados_total'])
+        prediccion = modeloLineal.predict(nuevo_usuario_df)
     else:
-        etiqueta_predicha = "Crítico"
+        nuevo_usuario_df = pd.DataFrame([nuevoUsuario])
+        prediccion = modeloForest.predict(nuevo_usuario_df)
 
-    print("La etiqueta predicha para el nuevo usuario es:", etiqueta_predicha)
+    if metodoInteligencia == '1':
+        if prediccion < modeloLineal.coef_:
+            etiqueta_predicha = "No crítico"
+        else:
+            etiqueta_predicha = "Crítico"
+    else:
+        if prediccion == 0:
+            etiqueta_predicha = "No crítico"
+        else:
+            etiqueta_predicha = "Crítico"
 
+    # Renderiza la plantilla 'metoditos.html' y pasa la ruta de la imagen
+    return render_template('metoditos.html', etiqueta = etiqueta_predicha)
 
+def grafico(modeloLineal, X_test, y_test):
 
+    PruebaArrayModelo = []
+    for i in range(0, len(X_test)):
+        PruebaArrayModelo.append(X_test.iloc[i]['cliclados'] / X_test.iloc[i]['total'])
+    PruebaArrayModelo = np.array(PruebaArrayModelo).reshape(-1, 1)
+    y_pred = modeloLineal.predict(PruebaArrayModelo)
+
+    plt.scatter(PruebaArrayModelo,y_test, color='red')
+
+    plt.plot(PruebaArrayModelo,y_pred, color='blue')
+
+    plt.xlabel('Clicados respecto del total')
+    plt.ylabel('Critico o no critico')
+
+    plt.savefig('regression_line.png')
+
+    plt.show()
+def graficoDecisionTree(modelo,X):
     # Exportar el árbol de decisiones a un archivo .dot
     dot_data = export_graphviz(modelo, out_file=None,
                                feature_names=X.columns.tolist(),
@@ -274,11 +346,18 @@ def metodoss():
     graph = graphviz.Source(dot_data)
     graph.render('test', format='png')
 
-    # Renderiza la plantilla 'metoditos.html' y pasa la ruta de la imagen
-    return render_template('metoditos.html', image_path='test.png')
+def graficoRamdomForest(modeloForest,X):
+    for i in range(len(modeloForest.estimators_)):
+        estimator = modeloForest.estimators_[i]
 
+        export_graphviz(estimator,
+                        out_file='tree' + str(i) + '.dot',
+                        feature_names=X.columns.tolist(),
+                        class_names=['0', '1'],
+                        rounded=True, proportion=False,
+                        precision=2, filled=True)
 
-
+        call(['dot', '-Tpng', 'tree' + str(i) + '.dot', '-o', 'tree' + str(i) + '.png', '-Gdpi=600'])
 """
 EJERCICIO 5.2: Datos para decicisión sobre usuario
 """
@@ -286,28 +365,6 @@ EJERCICIO 5.2: Datos para decicisión sobre usuario
 @app.route('/recogidaDatos')
 def mostrat_recogida_datos():
     return render_template('datosUsuario.html')
-
-
-@app.route('/verificarUsuario', methods=['POST'])
-def nuevoUsuario():
-    username = request.form['username']
-    phone = request.form['phone']
-    passwordHash = request.form['password']
-    permisos = request.form['permisos']
-    total = request.form['total']
-    phishing = request.form['phishing']
-    clicados = request.form['clicados']
-    contrasena_debil = esContrasenaDebil(passwordHash)
-    metodoInteligencia=request.form['metodoInt']
-    """"
-    1->Regresión Lineal
-    2->Árbol de Decisión
-    3->Bosque Aleatorio
-    """
-
-    #TODO MEZCLARLO CON EL METODO DE JUANCARLOS
-    #return redirect('/') #TODO: devolver la misma página de
-    return redirect(url_for('metodo', username=username, phone=phone, password=passwordHash, permisos=permisos, total=total, phishing=phishing, clicados=clicados, metodoInteligencia=metodoInteligencia))
 
 
 def esContrasenaDebil(passwordHash):
