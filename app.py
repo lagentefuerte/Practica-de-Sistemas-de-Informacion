@@ -14,7 +14,7 @@ from sklearn.model_selection import train_test_split
 from consultas import *
 import json
 import os
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics import mean_squared_error, r2_score, accuracy_score
 import numpy as np
 from subprocess import call
 def conectar_base_datos():
@@ -238,20 +238,18 @@ def metodoss():
 
 
 
-    # Agregar la ruta al directorio binario de Graphviz al entorno
+
     os.environ["PATH"] += os.pathsep + 'C:/Program Files/Graphviz/bin/'
     # Obtener los datos de los usuarios
     Datos = obtenerDatosUsuarios(cur)
     cur.close()
 
-    # Convertir el diccionario en un DataFrame
     df_usuarios = pd.DataFrame(Datos)
 
-    # Leer los datos desde el archivo CSV
     df_usuarios.to_csv('usuarios.csv', index=False)
     train = pd.read_csv('usuarios.csv')
 
-    # Separar las características (X) y la etiqueta (y)
+
     X = train[['phishing', 'total', 'contrasenadebil', 'permisos', 'cliclados']]
     y = train['etiquetas']
 
@@ -261,8 +259,6 @@ def metodoss():
     #Modelo Decision TREE
     modelo = tree.DecisionTreeClassifier()
     modelo.fit(X_train, y_train)
-    text_representation = tree.export_text(modelo)
-    print(text_representation)
 
 
     #Modelo de regresión lineal
@@ -273,7 +269,6 @@ def metodoss():
     modeloLineal = linear_model.LinearRegression()
     modeloLineal.fit(PruebaArray, y_train)
     print(modeloLineal.coef_)
-
 
     #Modelo Ramdom Forest
     modeloForest = RandomForestClassifier(max_depth=2, random_state=0,n_estimators=10)
@@ -293,13 +288,14 @@ def metodoss():
     elif metodoInteligencia == '1':
         nuevoUsuario['cliclados_total'] = int (nuevoUsuario['cliclados']) / int(nuevoUsuario['total'])
         nuevo_usuario_df = pd.DataFrame([nuevoUsuario['cliclados_total']],
-                                        columns=['cliclados_total'])  # Asegúrate de pasar una lista de diccionarios
+                                        columns=['cliclados_total'])
         prediccion = modeloLineal.predict(nuevo_usuario_df)
     else:
         nuevo_usuario_df = pd.DataFrame([nuevoUsuario])
         prediccion = modeloForest.predict(nuevo_usuario_df)
+
     if metodoInteligencia == '1':
-        if prediccion < 0.5:
+        if prediccion < modeloLineal.coef_:
             etiqueta_predicha = "No crítico"
         else:
             etiqueta_predicha = "Crítico"
@@ -313,22 +309,22 @@ def metodoss():
     return render_template('metoditos.html', etiqueta = etiqueta_predicha)
 
 def grafico(modeloLineal, X_test, y_test):
-    # Predecir los valores de y
+
     PruebaArrayModelo = []
     for i in range(0, len(X_test)):
         PruebaArrayModelo.append(X_test.iloc[i]['cliclados'] / X_test.iloc[i]['total'])
     PruebaArrayModelo = np.array(PruebaArrayModelo).reshape(-1, 1)
     y_pred = modeloLineal.predict(PruebaArrayModelo)
-    # Crear un gráfico de dispersión con los datos de entrenamiento
+
     plt.scatter(PruebaArrayModelo,y_test, color='red')
-    # Dibujar la línea de regresión
+
     plt.plot(PruebaArrayModelo,y_pred, color='blue')
-    # Etiquetas de los ejes
+
     plt.xlabel('Clicados respecto del total')
     plt.ylabel('Critico o no critico')
-    # Guardar el gráfico como una imagen PNG
+
     plt.savefig('regression_line.png')
-    # Mostrar el gráfico
+
     plt.show()
 def graficoDecisionTree(modelo,X):
     # Exportar el árbol de decisiones a un archivo .dot
@@ -343,14 +339,14 @@ def graficoDecisionTree(modelo,X):
 def graficoRamdomForest(modeloForest,X):
     for i in range(len(modeloForest.estimators_)):
         estimator = modeloForest.estimators_[i]
-        # Exportar cada árbol a un archivo .dot diferente
+
         export_graphviz(estimator,
                         out_file='tree' + str(i) + '.dot',
                         feature_names=X.columns.tolist(),
                         class_names=['0', '1'],
                         rounded=True, proportion=False,
                         precision=2, filled=True)
-        # Convertir cada archivo .dot a una imagen PNG diferente
+
         call(['dot', '-Tpng', 'tree' + str(i) + '.dot', '-o', 'tree' + str(i) + '.png', '-Gdpi=600'])
 """
 EJERCICIO 5.2: Datos para decicisión sobre usuario
